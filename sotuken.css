@@ -9,7 +9,7 @@ body {
 
 /* ボタン */
 button {
-    padding: 10px 20px;
+    padding: 12px 24px;
     font-size: 16px;
     border-radius: 5px;
     border: none;
@@ -24,11 +24,11 @@ button:hover {
     background-color: #45a049;
 }
 
-/* マップの枠 */
+/* マップ */
 #map {
-    height: 500px;
-    width: 90%;
-    max-width: 800px;
+    height: 60vh;  /* 画面高さの60% */
+    width: 95%;
+    max-width: 480px;  /* スマホ画面に合わせる */
     margin: 20px auto;
     border: 2px solid #444;
     border-radius: 8px;
@@ -39,4 +39,21 @@ button:hover {
     margin-top: 10px;
     font-weight: bold;
     color: #333;
+    font-size: 14px;
+}
+
+/* メディアクエリでさらに小さい画面向け調整 */
+@media (max-width: 400px) {
+    button {
+        padding: 10px 18px;
+        font-size: 14px;
+    }
+
+    #map {
+        height: 50vh;
+    }
+
+    #output {
+        font-size: 12px;
+    }
 }
