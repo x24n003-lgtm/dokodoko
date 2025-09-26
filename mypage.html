@@ -248,7 +248,7 @@
     <div class="container">
         <!-- ヘッダー -->
         <div class="header">
-            <a href="#" class="back-btn">← 戻る</a>
+            <a href="#" class="back-btn" onclick="goBack(event)">← 戻る</a>
             <h1 class="header-title">マイページ</h1>
         </div>
 
@@ -303,6 +303,22 @@
 
     <script>
         let isEditing = false;
+
+        // ===== 戻るボタンの機能 =====
+        function goBack(event) {
+            event.preventDefault(); // デフォルトのリンク動作を防ぐ
+            
+            // ブラウザの履歴があるかチェック
+            if (window.history.length > 1) {
+                window.history.back();
+                console.log('前のページに戻りました');
+            } else {
+                // 履歴がない場合のフォールバック
+                console.log('履歴がないため、ホームページにリダイレクトします');
+                // window.location.href = 'index.php'; // ホームページがある場合
+                alert('戻る履歴がありません');
+            }
+        }
 
         // 画像アップロード機能
         document.getElementById('imageUpload').addEventListener('change', function(e) {
