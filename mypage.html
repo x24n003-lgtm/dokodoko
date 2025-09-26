@@ -47,8 +47,6 @@
             color: #000;
         }
 
-
-
         /* プロフィール情報 */
         .profile-section {
             padding: 40px 20px;
@@ -159,6 +157,28 @@
             background: #f0f0f0;
         }
 
+        /* 保存ボタン */
+        .save-section {
+            padding: 20px;
+            text-align: center;
+        }
+
+        .save-btn {
+            background-color: #007AFF;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 24px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+            max-width: 200px;
+        }
+
+        .save-btn:hover {
+            background-color: #0056CC;
+        }
+
         /* ボトムナビゲーション */
         .bottom-nav {
             position: fixed;
@@ -208,16 +228,10 @@
         .nav-text {
             font-size: 11px;
         }
-
-        <!-- 保存ボタン -->
-        <!-- 削除されました -->
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- ステータスバー -->
-        <!-- 削除されました -->
-
         <!-- ヘッダー -->
         <div class="header">
             <a href="#" class="back-btn">← 戻る</a>
@@ -253,22 +267,22 @@
 
         <!-- 保存ボタン -->
         <div class="save-section">
-            <button class="save-btn" id="saveBtn" onclick="saveProfile()" style="display: none;>保存</button>
+            <button class="save-btn" id="saveBtn" onclick="saveProfile()" style="display: none;">保存</button>
         </div>
 
         <!-- ボトムナビゲーション -->
         <div class="bottom-nav">
             <a href="#" class="nav-item active">
                 <div class="nav-icon person"></div>
-                <span class="nav-text"></span>
+                <span class="nav-text">プロフィール</span>
             </a>
             <a href="#" class="nav-item">
                 <div class="nav-icon message"></div>
-                <span class="nav-text"></span>
+                <span class="nav-text">メッセージ</span>
             </a>
             <a href="#" class="nav-item">
                 <div class="nav-icon settings"></div>
-                <span class="nav-text"></span>
+                <span class="nav-text">設定</span>
             </a>
         </div>
     </div>
@@ -336,6 +350,21 @@
                     input.style.backgroundColor = '';
                 }, 1000);
             }
+        }
+
+        // 保存ボタンの処理（現在は未使用だが、将来の拡張のため残す）
+        function saveProfile() {
+            const name = document.getElementById('name').value;
+            const birthday = document.getElementById('birthday').value;
+            
+            console.log('保存ボタンが押されました');
+            console.log('氏名:', name);
+            console.log('生年月日:', birthday);
+            
+            // 実際の保存処理をここに実装
+            // 例: API呼び出しなど
+            
+            alert('プロフィールが保存されました');
         }
 
         // 初期化
