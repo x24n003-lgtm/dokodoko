@@ -23,6 +23,7 @@
             background-color: white;
             min-height: 100vh;
             position: relative;
+            padding-bottom: 80px; /* ボトムナビゲーション分の余白 */
         }
 
         /* ヘッダー */
@@ -192,6 +193,7 @@
             display: flex;
             justify-content: space-around;
             padding: 12px 0 34px;
+            z-index: 40;
         }
 
         .nav-item {
@@ -227,6 +229,18 @@
 
         .nav-text {
             font-size: 11px;
+        }
+
+        /* ===== レスポンシブ対応 ===== */
+        @media (max-width: 414px) {
+            .container {
+                max-width: 100%;
+                padding-bottom: 80px;
+            }
+            
+            .bottom-nav {
+                max-width: 100%;
+            }
         }
     </style>
 </head>
@@ -272,15 +286,15 @@
 
         <!-- ボトムナビゲーション -->
         <div class="bottom-nav">
-            <a href="#" class="nav-item active">
+            <a href="profile.php" class="nav-item active">
                 <div class="nav-icon person"></div>
                 <span class="nav-text">プロフィール</span>
             </a>
-            <a href="#" class="nav-item">
+            <a href="to-ku.php" class="nav-item">
                 <div class="nav-icon message"></div>
                 <span class="nav-text">メッセージ</span>
             </a>
-            <a href="#" class="nav-item">
+            <a href="settings.php" class="nav-item">
                 <div class="nav-icon settings"></div>
                 <span class="nav-text">設定</span>
             </a>
