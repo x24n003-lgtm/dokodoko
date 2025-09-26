@@ -393,11 +393,11 @@ if (isset($_GET['debug'])) {
     <div class="container">
         <!-- ===== ヘッダー ===== -->
         <div class="header">
-            <a href="profile.php" class="back-btn">← 戻る</a>
+            <a href="#" class="back-btn" onclick="goBack(event)">← 戻る</a>
             <div class="chat-info">
                 <div class="chat-avatar"></div>
                 <div>
-                    <div class="chat-name">久保安 凛太郎</div>
+                    <div class="chat-name">田中太郎</div>
                     <div class="chat-status">オンライン</div>
                 </div>
             </div>
@@ -481,6 +481,21 @@ if (isset($_GET['debug'])) {
     </div>
 
     <script>
+        // ===== 戻るボタンの機能 =====
+        function goBack(event) {
+            event.preventDefault(); // デフォルトのリンク動作を防ぐ
+            
+            // ブラウザの履歴があるかチェック
+            if (window.history.length > 1) {
+                window.history.back();
+                console.log('前のページに戻りました');
+            } else {
+                // 履歴がない場合のフォールバック
+                console.log('履歴がないため、プロフィールページにリダイレクトします');
+                window.location.href = 'profile.php'; // プロフィールページにフォールバック
+            }
+        }
+
         // ===== DOM要素の取得 =====
         const messageForm = document.getElementById('messageForm');
         const messageInput = document.getElementById('messageInput');
