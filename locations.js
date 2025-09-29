@@ -1,17 +1,30 @@
-fetch('locations.php')
-  .then(res => res.json())
-  .then(data => {
-    data.forEach(loc => {
-      let color;
-      if (loc.name.includes("学校")) color = "green";
-      else if (loc.name.includes("自宅")) color = "red";
-      else color = "yellow";
+function loadLocations() {
+  fetch("locations.php")
+    .then(res => res.json())
+    .then(data => {
+      data.forEach(loc => {
+        let color = "yellow";
+        if (loc.name.includes("学校")) color = "green";
+        else if (loc.name.includes("自宅")) color = "red";
 
-      L.circle([parseFloat(loc.lat), parseFloat(loc.lng)], {
-        color: color,
-        fillColor: color,
-        fillOpacity: 0.5,
-        radius: 50
-      }).addTo(map).bindPopup(loc.name);
+        // 円を描画
+        new google.maps.Circle({
+          strokeColor: color,
+          strokeOpacity: 0.8,
+          strokeWeight: 2,
+          fillColor: color,
+          fillOpacity: 0.5,
+          map: map,
+          center: { lat: parseFloat(loc.lat), lng: parseFloat(loc.lng) },
+          radius: 50
+        });
+
+        // マーカーを描画
+        new google.maps.Marker({
+          position: { lat: parseFloat(loc.lat), lng: parseFloat(loc.lng) },
+          map: map,
+          title: loc.name
+        });
+      });
     });
-  });
+}
