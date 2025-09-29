@@ -2,29 +2,25 @@ function loadLocations() {
   fetch("locations.php")
     .then(res => res.json())
     .then(data => {
+      const container = document.getElementById("markers");
+      container.innerHTML = ""; // 以前のマークをクリア
+
       data.forEach(loc => {
-        let color = "yellow";
-        if (loc.name.includes("学校")) color = "green";
-        else if (loc.name.includes("自宅")) color = "red";
+        const marker = document.createElement("div");
+        marker.classList.add("marker");
 
-        // 円を描画
-        new google.maps.Circle({
-          strokeColor: color,
-          strokeOpacity: 0.8,
-          strokeWeight: 2,
-          fillColor: color,
-          fillOpacity: 0.5,
-          map: map,
-          center: { lat: parseFloat(loc.lat), lng: parseFloat(loc.lng) },
-          radius: 50
-        });
+        // 色判定
+        if (loc.name.includes("学校")) {
+          marker.classList.add("inside");  // 緑
+        } else if (loc.name.includes("自宅")) {
+          marker.classList.add("outside"); // 赤
+        } else {
+          marker.classList.add("other");   // 黄色
+        }
 
-        // マーカーを描画
-        new google.maps.Marker({
-          position: { lat: parseFloat(loc.lat), lng: parseFloat(loc.lng) },
-          map: map,
-          title: loc.name
-        });
+        marker.title = loc.name; // ホバーで名前表示
+        container.appendChild(marker);
       });
-    });
+    })
+    .catch(err => console.error(err));
 }
