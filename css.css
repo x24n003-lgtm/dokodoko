@@ -1,0 +1,72 @@
+body {
+    font-family: "Segoe UI", "Hiragino Kaku Gothic ProN", "メイリオ", sans-serif;
+    background-color: #f8f9fa;
+    margin: 0;
+    padding: 0;
+  }
+  
+  /* タイトル（新規会員登録） */
+  h1 {
+    position: fixed;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 20px;
+    margin: 0;
+    padding: 15px 0;
+    width: 100%;
+    background-color: #fff;
+    text-align: center;
+    border-bottom: 1px solid #ddd;
+    z-index: 1000;
+  }
+  
+  .container {
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 90px 20px 40px; /* タイトル分の余白を確保 */
+  }
+  
+  .form-group {
+    margin-bottom: 15px;
+  }
+  
+  .form-group label {
+    display: block;
+    font-size: 14px;
+    margin-bottom: 5px;
+    color: #555;
+  }
+  
+  .form-group input {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    box-sizing: border-box;
+    background-color: #fdfdfd;
+  }
+  
+  .form-group input:focus {
+    border-color: #4a90e2;
+    outline: none;
+    box-shadow: 0 0 4px rgba(74, 144, 226, 0.5);
+  }
+  
+  .btn {
+    width: 100%;
+    padding: 14px;
+    background-color: #2d4be2;
+    color: white;
+    font-size: 16px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+  
+  .btn:hover {
+    background-color: #1c35a0;
+  }
+  
