@@ -1,0 +1,248 @@
+/* すべての要素の初期設定（リセットCSS） */
+* {
+    margin: 0;             /* 余白をなくす */
+    padding: 0;            /* 内側余白をなくす */
+    box-sizing: border-box; /* 幅計算をpadding・border込みにする */
+}
+
+/* ページ全体の設定 */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; /* モダンフォント */
+    background-color: #f0f0f0; /* 背景を薄いグレーに */
+    display: flex;             /* 要素を中央に配置するためにflexを使用 */
+    justify-content: center;   /* 横方向の中央寄せ */
+    align-items: center;       /* 縦方向の中央寄せ */
+    min-height: 100vh;         /* 画面全体の高さ */
+    padding: 20px;             /* 画面端との余白 */
+}
+
+/* スマホ画面っぽい外枠（本体） */
+.phone-container {
+    width: 100%;
+    max-width: 430px;             /* 最大幅（iPhone Pro Maxサイズ程度） */
+    background: white;
+    border-radius: 30px;          /* 丸みを持たせる（スマホ風） */
+    box-shadow: 0 10px 50px rgba(0,0,0,0.2); /* ふんわり影 */
+    overflow: hidden;             /* 内側がはみ出ないようにする */
+    display: flex;
+    flex-direction: column;       /* 上から下に要素を並べる */
+    height: 90vh;                 /* 画面の高さの90%を使用 */
+    max-height: 900px;            /* 上限を指定 */
+}
+
+/* ステータスバー（上の時間・電波・電池など） */
+.status-bar {
+    background: white;
+    padding: 10px 20px 5px;
+    display: flex;
+    justify-content: space-between; /* 左右に分けて配置 */
+    align-items: center;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.status-icons {
+    display: flex;
+    gap: 3px; /* アイコン同士の間隔 */
+}
+
+/* ヘッダー部分（クラス名と選択ボックス） */
+.header {
+    background: white;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.class-info {
+    display: flex;
+    align-items: center;
+}
+
+.class-name {
+    font-size: 22px;
+    font-weight: bold; /* 太字 */
+}
+
+/* クラス選択ドロップダウン */
+.class-selector {
+    position: relative;
+}
+
+.class-dropdown {
+    padding: 8px 35px 8px 15px; /* 内側余白（右側はアイコン分広く） */
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 16px;
+    background: white;
+    appearance: none; /* ブラウザ標準デザインを消す */
+    cursor: pointer;
+    /* ▼アイコンを背景画像で追加 */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center; /* 右側にアイコンを配置 */
+}
+
+/* 検索バー部分 */
+.search-bar {
+    padding: 10px 20px 15px;
+    background: white;
+}
+
+/* 検索入力欄 */
+.search-input {
+    width: 100%;
+    padding: 10px 15px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    font-size: 16px;
+    background-color: #f5f5f5;
+}
+
+.search-input::placeholder {
+    color: #999; /* 薄いグレーのプレースホルダー */
+}
+
+/* メインコンテンツエリア（生徒一覧） */
+.content {
+    flex: 1;            /* 余ったスペースを全部使う */
+    overflow-y: auto;   /* 縦スクロール可能 */
+    background: white;
+}
+
+/* 生徒リスト全体 */
+.student-list {
+    padding: 0 20px;
+}
+
+/* 生徒1人分の表示ブロック */
+.student-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #f0f0f0; /* 仕切り線 */
+    gap: 12px; /* 各要素の間隔 */
+}
+
+.student-item:last-child {
+    border-bottom: none; /* 最後の行は線を消す */
+}
+
+/* アバター（円アイコン） */
+.student-avatar {
+    flex-shrink: 0; /* 画像サイズを縮めない */
+}
+
+.avatar-circle {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%; /* 丸くする */
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); /* グラデーション */
+}
+
+/* 生徒情報（名前とステータス） */
+.student-info {
+    flex: 1;
+    min-width: 0; /* レイアウト崩れ防止 */
+}
+
+.student-name {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 3px;
+}
+
+.student-detail {
+    font-size: 13px;
+    color: #999;
+}
+
+/* 出席・遅刻などの右側ステータス表示 */
+.status-display {
+    flex-shrink: 0;
+    text-align: right;
+    margin-right: 12px;
+}
+
+.status-text {
+    font-size: 14px;
+    color: #333;
+    line-height: 1.3;
+}
+
+.status-time {
+    font-size: 12px;
+    color: #666;
+}
+
+/* 現在地を示す丸い色インジケーター */
+.location-indicator {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+/* 現在地ごとの色分け */
+.location-indicator.green {
+    background-color: #34C759; /* 学校（緑） */
+}
+
+.location-indicator.red {
+    background-color: #FF3B30; /* 自宅（赤） */
+}
+
+.location-indicator.yellow {
+    background-color: #FFD60A; /* その他（黄） */
+}
+
+.location-indicator.gray {
+    background-color: #8E8E93; /* 不明（グレー） */
+}
+
+/* 画面下のナビゲーションバー */
+.bottom-nav {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 10px 0 20px;
+    background: white;
+    border-top: 1px solid #e0e0e0;
+}
+
+/* ナビゲーションボタン（アイコン部分） */
+.nav-item {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 8px;
+    cursor: pointer;
+    border: none;
+    background: none;
+    position: relative;
+}
+
+/* SVGアイコンのサイズ */
+.nav-item svg {
+    width: 28px;
+    height: 28px;
+}
+
+/* 選択中のアイコン */
+.nav-item.active {
+    color: #007AFF; /* 青で強調 */
+}
+
+/* アクティブ時の下線 */
+.nav-item.active::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    width: 60%;
+    height: 3px;
+    background: #007AFF;
+    border-radius: 2px;
+}
