@@ -1,26 +1,37 @@
-function loadLocations() {
-  fetch("locations.php")
-    .then(res => res.json())
-    .then(data => {
-      const container = document.getElementById("markers");
-      container.innerHTML = ""; // 以前のマークをクリア
-
-      data.forEach(loc => {
-        const marker = document.createElement("div");
-        marker.classList.add("marker");
-
-        // 色判定
-        if (loc.name.includes("学校")) {
-          marker.classList.add("inside");  // 緑
-        } else if (loc.name.includes("自宅")) {
-          marker.classList.add("outside"); // 赤
-        } else {
-          marker.classList.add("other");   // 黄色
-        }
-
-        marker.title = loc.name; // ホバーで名前表示
-        container.appendChild(marker);
+async function sendMyLocation() {
+  const pos = await new Promise((resolve, reject) => {
+    if (!navigator.geolocation) {
+      reject("ブラウザが位置情報をサポートしていません");
+    } else {
+      navigator.geolocation.getCurrentPosition(resolve, reject, {
+        enableHighAccuracy: true,
+        maximumAge: 0,
+        timeout: 5000
       });
-    })
-    .catch(err => console.error(err));
+    }
+  });
+
+  const lat = pos.coords.latitude;
+  const lng = pos.coords.longitude;
+  const name = "久保柊馬"; // ここは文字化けしないように
+
+  try {
+    const res = await fetch("save_locations.php", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, lat, lng })
+    });
+    console.log(await res.text());
+  } catch (err) {
+    console.error("送信エラー:", err);
+  }
 }
+
+// 全員の位置更新
+async function updateLoop() {
+  await sendMyLocation();
+  await loadLocations();
+}
+
+// 5秒ごとにループ
+setInterval(updateLoop, 5000);

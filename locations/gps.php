@@ -42,7 +42,7 @@
           // ★ DBに送信する部分 ★
           const name = "久保柊馬"; // ←自分の識別名に変更
 
-          fetch("save_location.php", {
+          fetch("save_locations.php", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
