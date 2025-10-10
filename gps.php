@@ -12,7 +12,7 @@
   <div id="map" style="height:500px;width:100%;"></div>
 
   <script>
-    // グローバル変数としてmap（地図）とmarker（現在地マーカー）を定義
+    // グローバル変数としてmapとmarkerを定義
     let map, marker;
 
     // --- マップを初期化する関数 ---
