@@ -53,7 +53,7 @@ h1 {
 <script>
 // DBからデータ取得
 function loadLocations() {
-  fetch("locations.php")
+  fetch("compare_locations.php")
     .then(res => res.json())
     .then(data => {
       const list = document.getElementById("list");
