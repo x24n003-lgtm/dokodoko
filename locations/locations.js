@@ -1,37 +1,40 @@
-async function sendMyLocation() {
-  const pos = await new Promise((resolve, reject) => {
-    if (!navigator.geolocation) {
-      reject("ブラウザが位置情報をサポートしていません");
-    } else {
-      navigator.geolocation.getCurrentPosition(resolve, reject, {
-        enableHighAccuracy: true,
-        maximumAge: 0,
-        timeout: 5000
-      });
-    }
-  });
-
-  const lat = pos.coords.latitude;
-  const lng = pos.coords.longitude;
-  const name = "久保柊馬"; // ここは文字化けしないように
-
+async function loadComparison() {
   try {
-    const res = await fetch("save_locations.php", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, lat, lng })
+    const res = await fetch("compare_locations.php");
+    const data = await res.json();
+
+    const container = document.getElementById("markers");
+    container.innerHTML = ""; // 以前の表示を消す
+
+    data.forEach(loc => {
+      const marker = document.createElement("div");
+      marker.classList.add("marker");
+
+      // 校内・校外で色を分ける
+      if (loc.status === "校内") {
+        marker.style.backgroundColor = "green"; // 緑：校内
+      } else {
+        marker.style.backgroundColor = "red"; // 赤：校外
+      }
+
+      // 情報表示
+      marker.textContent = `${loc.name} (${loc.status})`;
+      marker.style.color = "white";
+      marker.style.padding = "6px";
+      marker.style.margin = "4px";
+      marker.style.borderRadius = "8px";
+      marker.style.display = "block";
+
+      container.appendChild(marker);
     });
-    console.log(await res.text());
+
   } catch (err) {
-    console.error("送信エラー:", err);
+    console.error("比較結果の取得エラー:", err);
   }
 }
 
-// 全員の位置更新
-async function updateLoop() {
-  await sendMyLocation();
-  await loadLocations();
-}
+// 5秒ごとに実行
+setInterval(loadComparison, 5000);
 
-// 5秒ごとにループ
-setInterval(updateLoop, 5000);
+// 初回起動時にも即実行
+loadComparison();
