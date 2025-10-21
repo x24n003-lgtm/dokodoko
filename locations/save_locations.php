@@ -1,11 +1,11 @@
 <?php
 // データベース接続設定
-$host = "localhost";
-$user = "root";
-$pass = "";
-$dbname = "sotuken";
+$host = "172.16.199.21";  // Linux MariaDB の IP
+$user = "x24n007";
+$pass = "n051211";
+$db   = "dokodoko";
 
-$conn = new mysqli($host, $user, $pass, $dbname);
+$conn = new mysqli($host, $user, $pass, $db);
 if ($conn->connect_error) {
     die("DB接続失敗: " . $conn->connect_error);
 }

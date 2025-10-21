@@ -1,6 +1,6 @@
 <?php
 // 接続情報
-$host = "192.168.186.129";  // Linux MariaDB の IP
+$host = "172.16.199.21";  // Linux MariaDB の IP
 $user = "x24n007";
 $pass = "n051211";
 $db   = "dokodoko";

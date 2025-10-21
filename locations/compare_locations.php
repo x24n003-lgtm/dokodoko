@@ -1,11 +1,10 @@
 <?php
 header("Content-Type: application/json; charset=UTF-8");
 
-// DB接続
-$host = "localhost";
-$user = "root";
-$pass = "";
-$dbname = "sotuken";
+$host = "172.16.199.21";  // Linux MariaDB の IP
+$user = "x24n007";
+$pass = "n051211";
+$db   = "dokodoko";
 $conn = new mysqli($host, $user, $pass, $dbname);
 if ($conn->connect_error) {
     die(json_encode(["error" => "DB接続失敗: " . $conn->connect_error]));
