@@ -1,28 +1,35 @@
 <?php
-$host = "localhost";
-$user = "root";         // MariaDB ユーザー
-$pass = "";             // パスワード
-$dbname = "dokodoko";
+// 接続情報
+$host = "192.168.186.129";  // Linux MariaDB の IP
+$user = "x24n007";
+$pass = "n051211";
+$db   = "dokodoko";
 
-$conn = new mysqli($host, $user, $pass, $dbname);
-if ($conn->connect_error) die("DB接続失敗: ".$conn->connect_error);
-$conn->set_charset("utf8");
+// 接続試行
+$conn = new mysqli($host, $user, $pass, $db);
 
-$input = file_get_contents("php://input");
-$data = json_decode($input, true);
+// HTMLヘッダ
+echo "<!DOCTYPE html><html lang='ja'><head><meta charset='UTF-8'><title>DB接続テスト</title></head><body>";
 
-if(!$data || !isset($data["name"], $data["lat"], $data["lng"])) die("不正なデータ");
+if ($conn->connect_error) {
+    echo "<h2 style='color:red'>接続失敗！</h2>";
+    echo "<p>エラー: " . $conn->connect_error . "</p>";
+} else {
+    echo "<h2 style='color:green'>接続成功！</h2>";
+    echo "<p>dokodoko データベースにアクセスできます。</p>";
 
-$name = $data["name"];
-$lat = $data["lat"];
-$lng = $data["lng"];
-
-// 緯度経度を更新
-$stmt = $conn->prepare("UPDATE users SET lat = ?, lng = ? WHERE name = ?");
-$stmt->bind_param("dds", $lat, $lng, $name);
-$stmt->execute();
-$stmt->close();
+    // データベース内のテーブル一覧を取得
+    $result = $conn->query("SHOW TABLES");
+    if ($result) {
+        echo "<h3>テーブル一覧：</h3><ul>";
+        while ($row = $result->fetch_array()) {
+            echo "<li>" . htmlspecialchars($row[0]) . "</li>";
+        }
+        echo "</ul>";
+    }
+}
 
 $conn->close();
-echo "位置情報を更新しました";
+
+echo "</body></html>";
 ?>
