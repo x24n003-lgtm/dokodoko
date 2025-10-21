@@ -28,7 +28,7 @@ function initMap() {
     });
 
     // PHP から取得した位置情報を描画
-    fetch('locations.php')
+    fetch('compare_locations.php')
         .then(res => res.json())
         .then(data => {
             data.forEach(loc => {

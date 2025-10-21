@@ -71,7 +71,7 @@ function updateMyLocation() {
 
 // DBから全員の位置を取得して描画
 function loadAllLocations() {
-    fetch("locations.php")
+    fetch("compare_locations.php")
     .then(res => res.json())
     .then(data => {
         // 既存マーカー削除

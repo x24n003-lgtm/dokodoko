@@ -5,7 +5,9 @@ $host = "172.16.199.21";  // Linux MariaDB の IP
 $user = "x24n007";
 $pass = "n051211";
 $db   = "dokodoko";
-$conn = new mysqli($host, $user, $pass, $dbname);
+
+// ←★ 修正ポイント：$dbname → $db
+$conn = new mysqli($host, $user, $pass, $db);
 if ($conn->connect_error) {
     die(json_encode(["error" => "DB接続失敗: " . $conn->connect_error]));
 }
@@ -15,11 +17,11 @@ $school_lat = 35.704517;
 $school_lng = 139.984413;
 
 // DB内の全データ取得
-$sql = "SELECT name, lat, lng FROM locations";
+$sql = "SELECT name, lat, lng FROM users";
 $result = $conn->query($sql);
 
 $locations = [];
-if ($result->num_rows > 0) {
+if ($result && $result->num_rows > 0) {
     while ($row = $result->fetch_assoc()) {
         $lat = (float)$row["lat"];
         $lng = (float)$row["lng"];
