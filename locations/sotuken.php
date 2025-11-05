@@ -27,7 +27,7 @@ function initMap() {
 
 // 自分の位置を送信する関数
 function sendMyLocation(lat, lng) {
-    const name = "久保柊馬"; // 任意の識別名
+    const name = "船橋情報ビジネス専門学校"; // 任意の識別名
     fetch("save_locations.php", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -79,7 +79,7 @@ function loadAllLocations() {
         otherMarkers = [];
 
         data.forEach(loc => {
-            if (loc.name === "久保柊馬") return; // 自分は除外
+            if (loc.name === "船橋情報ビジネス専門学校") return; // 自分は除外
 
             const marker = new google.maps.Marker({
                 position: {lat: parseFloat(loc.lat), lng: parseFloat(loc.lng)},
