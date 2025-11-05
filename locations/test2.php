@@ -24,7 +24,7 @@ session_start();
         }
         ?>
        
-        <form action="test.php" method="POST" id="registerForm">
+        <form action="test2.php" method="POST" id="registerForm">
             <div class="form-group">
                 <label for="email">メールアドレス *</label>
                 <input type="email" id="email" name="email" required
