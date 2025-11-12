@@ -1,29 +1,36 @@
 // ======================================
-// 住所から緯度・経度を取得してDBへ送信（id方式）
+// 住所から緯度・経度を取得してDBへ送信（セッション方式）
 // ======================================
 async function sendLocationFromAddress() {
-  // --- HTMLの住所入力欄 ---
+  console.log("✅ sendLocationFromAddress() が呼ばれました");
+
   const home_addressInput = document.getElementById("home_address");
+  if (!home_addressInput) {
+    console.error("❌ #home_address が見つかりません");
+    return;
+  }
+
   const home_address = home_addressInput.value.trim();
-
-
+  console.log("🏠 入力住所:", home_address);
 
   if (!home_address) {
     alert("住所を入力してください");
     return;
   }
 
-  // --- Google Maps Geocoding API ---
-  const apiKey = "AIzaSyA2-Yo-Z_8bTG8KKCSf7fOTlH026W5wDwg"; // ←自分のAPIキーに変更
+  const apiKey = "AIzaSyA2-Yo-Z_8bTG8KKCSf7fOTlH026W5wDwg";
   const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(home_address)}&key=${apiKey}`;
 
   try {
+    console.log("🌐 Google API にアクセス中:", url);
     const res = await fetch(url);
     const geoData = await res.json();
 
+    console.log("📦 取得結果:", geoData);
+
     if (geoData.status !== "OK") {
       alert("住所から緯度経度を取得できませんでした。");
-      console.error(geoData);
+      console.error("❌ Geocoding失敗:", geoData);
       return;
     }
 
@@ -31,19 +38,15 @@ async function sendLocationFromAddress() {
     const lat = location.lat;
     const lng = location.lng;
 
-    console.log(`住所: ${home_address} → 緯度: ${lat}, 経度: ${lng}`);
+    console.log(`📍 緯度: ${lat}, 経度: ${lng}`);
 
-    // --- DB の id を指定（htmlから持ってきて自動ID割り振り） ---
-    const userIdInput = document.getElementById("user_id");
-    const user_id = parseInt(userIdInput.value, 10);
-    
+    // --- PHPサーバーへ送信（セッションから user_id を取得） ---
+    console.log("📤 save_locations.php に送信開始");
 
-    // --- PHPサーバーへ送信 ---
     const response = await fetch("save_locations.php", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        id: user_id,
         lat: lat,
         lng: lng,
         home_address: home_address
@@ -51,10 +54,10 @@ async function sendLocationFromAddress() {
     });
 
     const text = await response.text();
-    console.log("サーバー応答:", text);
+    console.log("📨 サーバー応答:", text);
 
   } catch (err) {
-    console.error("位置情報送信エラー:", err);
+    console.error("💥 位置情報送信エラー:", err);
   }
 }
 
@@ -67,6 +70,11 @@ async function loadComparison() {
     const data = await res.json();
 
     const container = document.getElementById("markers");
+    if (!container) {
+      console.warn("⚠️ #markers が見つからないためスキップ");
+      return;
+    }
+
     container.innerHTML = "";
 
     data.forEach(loc => {
@@ -78,11 +86,10 @@ async function loadComparison() {
       } else if (loc.status === "学校外") {
         marker.style.backgroundColor = "red";
       } else {
-        marker.style.backgroundColor = "gray"; // 位置情報なし
+        marker.style.backgroundColor = "gray";
       }
 
       marker.textContent = `${loc.username || "不明"} (${loc.status})`;
-
       marker.style.color = "white";
       marker.style.padding = "6px";
       marker.style.margin = "4px";
@@ -93,12 +100,13 @@ async function loadComparison() {
     });
 
   } catch (err) {
-    console.error("比較結果の取得エラー:", err);
+    console.error("💥 比較結果の取得エラー:", err);
   }
 }
 
 // ======================================
 // 初期化処理
 // ======================================
+console.log("🚀 JS 読み込み完了：5秒ごとに比較データ更新開始");
 setInterval(loadComparison, 5000);
 loadComparison();
