@@ -1,72 +1,59 @@
 <?php
 header("Content-Type: application/json; charset=UTF-8");
 
-// --- エラー表示を追加（デバッグ用） ---
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
+// DB 接続
+$conn = new mysqli("172.16.199.21", "x24n007", "n051211", "dokodoko");
+$conn->set_charset("utf8mb4");
 
-// --- DB接続設定 ---
-$host = "172.16.199.21";
-$user = "x24n007";
-$pass = "n051211";
-$db   = "dokodoko";
 
-// --- DB接続 ---
-$conn = new mysqli($host, $user, $pass, $db);
 if ($conn->connect_error) {
-    echo json_encode([
-        "error" => "DB接続失敗: " . $conn->connect_error
-    ], JSON_UNESCAPED_UNICODE);
+    echo json_encode(["error" => "DB接続失敗"]);
     exit;
 }
 
-// --- 学校（固定）の緯度経度 ---
-$school_lat = 35.704517;
-$school_lng = 139.984413;
+// 学校位置
+$schoolLat = 35.704517;
+$schoolLng = 139.984413;
 
-// --- DB内の全データ取得 ---
-$sql = "SELECT username, lat, lng FROM users";
-$result = $conn->query($sql);
+// 全ユーザー取得
+$res = $conn->query("SELECT username, lat, lng FROM users");
 
-$locations = [];
+$results = [];
 
-if ($result && $result->num_rows > 0) {
-    while ($row = $result->fetch_assoc()) {
-        $lat = (float)$row["lat"];
-        $lng = (float)$row["lng"];
+while ($row = $res->fetch_assoc()) {
 
-        // --- 距離を計算（メートル）---
-        // Haversine公式を使用
-        $earth_radius = 6371000; // 地球の半径[m]
-        $dLat = deg2rad($lat - $school_lat);
-        $dLng = deg2rad($lng - $school_lng);
-        
-        $a = sin($dLat / 2) ** 2 +
-             cos(deg2rad($school_lat)) * cos(deg2rad($lat)) *
-             sin($dLng / 2) ** 2;
-        $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
-        $distance = $earth_radius * $c;
-
-        // --- 判定（500m以内なら「校内」）---
-        $status = ($distance <= 500) ? "校内" : "校外";
-
-        // --- 結果を配列に追加 ---
-        $locations[] = [
+    // lat/lng が NULL のユーザー → スキップ
+    $lat = $row["lat"] !== null ? (float)$row["lat"] : null;
+    $lng = $row["lng"] !== null ? (float)$row["lng"] : null;
+    
+    if ($lat === null || $lng === null) {
+        $results[] = [
             "username" => $row["username"],
-            "lat" => $lat,
-            "lng" => $lng,
-            "distance_m" => round($distance, 2),
-            "status" => $status
+            "status" => "位置情報なし（判定不可）"
         ];
+        continue;
     }
-} else {
-    // データが0件の場合も正常なレスポンスを返す
-    $locations = [];
+    
+    // 距離計算（Haversine）
+    $lat1 = deg2rad($row["lat"]);
+    $lng1 = deg2rad($row["lng"]);
+    $lat2 = deg2rad($schoolLat);
+    $lng2 = deg2rad($schoolLng);
+
+    $earth = 6371; // 地球の半径（km）
+
+    $d = 2 * $earth * asin(
+        sqrt(
+            pow(sin(($lat2 - $lat1) / 2), 2) +
+            cos($lat1) * cos($lat2) * pow(sin(($lng2 - $lng1) / 2), 2)
+        )
+    );
+
+    $results[] = [
+        "username" => $row["username"],
+        "distance_km" => round($d, 3),
+        "status" => ($d < 0.1 ? "学校内" : "学校外")
+    ];
 }
 
-// --- DB接続を閉じる ---
-$conn->close();
-
-// --- JSON出力 ---
-echo json_encode($locations, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
-?>
+echo json_encode($results, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
