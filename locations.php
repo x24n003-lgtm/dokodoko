@@ -6,7 +6,7 @@ if ($conn->connect_error) {
     die("接続失敗: " . $conn->connect_error);
 }
 
-$sql = "SELECT name, lat, lng FROM locations";
+$sql = "SELECT name, lat, lng FROM users";
 $result = $conn->query($sql);
 
 $locations = [];

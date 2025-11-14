@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>現在登録されているメンバー一覧</title>
+<style>
+body {
+  font-family: "Segoe UI", sans-serif;
+  background: #f5f5f5;
+  text-align: center;
+  padding: 30px;
+}
+h1 {
+  color: #333;
+}
+#list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 30px;
+}
+.marker {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  border-radius: 50px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  padding: 10px 15px;
+  min-width: 200px;
+}
+.marker-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  margin-right: 10px;
+}
+.status-campus {
+  background-color: #4CAF50; /* 校内＝緑 */
+}
+.status-outside {
+  background-color: #f44336; /* 校外＝赤 */
+}
+.status-other {
+  background-color: #ff9800; /* その他＝オレンジ */
+}
+</style>
+</head>
+<body>
+<h1>現在登録されているメンバー</h1>
+<div id="list">読み込み中...</div>
+
+<script>
+// DBからデータ取得
+function loadLocations() {
+  fetch("compare_locations.php")
+    .then(res => res.json())
+    .then(data => {
+      const list = document.getElementById("list");
+      list.innerHTML = "";
+
+      if (!Array.isArray(data) || data.length === 0) {
+        list.textContent = "データがありません。";
+        return;
+      }
+
+      data.forEach(loc => {
+        const div = document.createElement("div");
+        div.className = "marker";
+
+        const dot = document.createElement("div");
+        // ステータスに応じて色分け
+        if (loc.status === "校内") {
+          dot.className = "marker-dot status-campus";
+        } else if (loc.status === "校外") {
+          dot.className = "marker-dot status-outside";
+        } else {
+          dot.className = "marker-dot status-other";
+        }
+
+        const name = document.createElement("span");
+        name.textContent = loc.name;
+
+        div.appendChild(dot);
+        div.appendChild(name);
+        list.appendChild(div);
+      });
+    })
+    .catch(err => {
+      console.error("取得エラー:", err);
+      document.getElementById("list").textContent = "データの取得に失敗しました。";
+    });
+}
+
+// ページ読み込み時に実行
+loadLocations();
+
+// 5秒ごとに自動更新
+setInterval(loadLocations, 5000);
+</script>
+</body>
+</html>

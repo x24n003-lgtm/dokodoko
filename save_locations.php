@@ -1,46 +1,58 @@
 <?php
-// データベース接続設定
-$host = "localhost";
-$user = "root";
-$pass = "";          // XAMPPなら通常は空
-$dbname = "sotuken";
+header("Content-Type: application/json; charset=UTF-8");
 
-$conn = new mysqli($host, $user, $pass, $dbname);
+// JSON を受け取り
+$input = file_get_contents("php://input");
+$data = json_decode($input, true);
+
+if (!$data || !isset($data["email"])) {
+    echo json_encode(["error" => "不正なデータ（email が必要）"], JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
+$email = $data["email"];
+$lat = $data["lat"] ?? null;
+$lng = $data["lng"] ?? null;
+$home_address = $data["home_address"] ?? null;
+
+// DB 接続
+$conn = new mysqli("172.16.199.21", "x24n007", "n051211", "dokodoko");
+$conn->set_charset("utf8mb4");
+
 if ($conn->connect_error) {
-  die("DB接続失敗: " . $conn->connect_error);
+    echo json_encode(["error" => "DB接続失敗"]);
+    exit;
 }
 
-// JSONデータ受け取り
-$data = json_decode(file_get_contents("php://input"), true);
-$name = $data["name"];
-$lat = $data["lat"];
-$lng = $data["lng"];
+// lat/lng がある → 位置情報を更新
+if ($lat !== null && $lng !== null) {
 
-// 既存の name をチェック
-$sql_check = "SELECT id FROM locations WHERE name = ?";
-$stmt = $conn->prepare($sql_check);
-$stmt->bind_param("s", $name);
-$stmt->execute();
-$result = $stmt->get_result();
+    // 位置情報更新
+    $stmt = $conn->prepare("
+        UPDATE users 
+        SET lat = ?, lng = ?, location_updated_at = NOW()
+        WHERE email = ?
+    ");
+    $stmt->bind_param("dds", $lat, $lng, $email);
+    $stmt->execute();
+    $stmt->close();
 
-if ($result->num_rows > 0) {
-  // 既に存在 → 更新
-  $sql_update = "UPDATE locations SET lat = ?, lng = ? WHERE name = ?";
-  $stmt_update = $conn->prepare($sql_update);
-  $stmt_update->bind_param("dds", $lat, $lng, $name);
-  $stmt_update->execute();
-  echo "位置情報を更新しました";
-  $stmt_update->close();
-} else {
-  // 存在しない → 新規登録
-  $sql_insert = "INSERT INTO locations (name, lat, lng) VALUES (?, ?, ?)";
-  $stmt_insert = $conn->prepare($sql_insert);
-  $stmt_insert->bind_param("sdd", $name, $lat, $lng);
-  $stmt_insert->execute();
-  echo "位置情報を追加しました";
-  $stmt_insert->close();
+    // 住所も来ていたら更新
+    if ($home_address !== null) {
+        $stmt2 = $conn->prepare("
+            UPDATE users 
+            SET home_address = ?
+            WHERE email = ?
+        ");
+        $stmt2->bind_param("ss", $home_address, $email);
+        $stmt2->execute();
+        $stmt2->close();
+    }
+
+    echo json_encode(["status" => "位置情報更新完了"]);
+    exit;
 }
 
-$stmt->close();
-$conn->close();
-?>
+// lat/lng が無い場合
+echo json_encode(["status" => "データ受信（lat/lng 無しのため未更新）"]);
+exit;

@@ -1,33 +1,39 @@
 <?php
 require_once 'db_config.php';
+session_start();
+
+// ------------------ ログイン確認 ------------------
+if (!isset($_SESSION['email'])) {
+    header('Location: login.php');
+    exit();
+}
+$userEmail = $_SESSION['email'];
 
 // ------------------ 基本設定 ------------------
 date_default_timezone_set('Asia/Tokyo');
 
-// GETパラメータから年月を受け取る（なければ今月）
+// ------------------ 年月取得 ------------------
 $year  = isset($_GET['year']) ? (int)$_GET['year'] : date("Y");
 $month = isset($_GET['month']) ? (int)$_GET['month'] : date("n");
 
-// 前月と次月を計算
+// 前月・次月計算
 $prev = strtotime("-1 month", strtotime("$year-$month-01"));
 $next = strtotime("+1 month", strtotime("$year-$month-01"));
 $prevYear = date("Y", $prev);
 $prevMonth = date("n", $prev);
 $nextYear = date("Y", $next);
-$nextMonth = date("n", $next);
+$nextMonth = date("n", $nextMonth);
 
-// ------------------ データベースからイベントを取得 ------------------
+// ------------------ DBからイベント取得 ------------------
 $pdo = getDbConnection();
 $events = [];
 
 try {
-    // 指定された月のイベントを取得
     $firstDay = "$year-" . str_pad($month, 2, '0', STR_PAD_LEFT) . "-01";
-    $lastDay = date("Y-m-t", strtotime($firstDay));
-    
-    $stmt = $pdo->prepare("SELECT event_date, event_title, event_description FROM calendar_events WHERE event_date BETWEEN ? AND ? ORDER BY event_date");
+    $lastDay  = date("Y-m-t", strtotime($firstDay));
+
+    $stmt = $pdo->prepare("SELECT event_date, event_title FROM calendar_events WHERE event_date BETWEEN ? AND ? ORDER BY event_date");
     $stmt->execute([$firstDay, $lastDay]);
-    
     while ($row = $stmt->fetch()) {
         $events[$row['event_date']] = $row['event_title'];
     }
@@ -43,10 +49,10 @@ $lastDay  = new DateTime($firstDay->format("Y-m-t"));
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>カレンダーアプリ</title>
-    <link rel="stylesheet" href="homecss.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>カレンダーアプリ</title>
+<link rel="stylesheet" href="homecss.css">
 </head>
 <body>
 
@@ -75,10 +81,7 @@ $lastDay  = new DateTime($firstDay->format("Y-m-t"));
 
         <table class="calendar-table">
             <thead>
-                <tr>
-                    <th>日付</th>
-                    <th>予定</th>
-                </tr>
+                <tr><th>日付</th><th>予定</th></tr>
             </thead>
             <tbody>
                 <?php
@@ -92,7 +95,7 @@ $lastDay  = new DateTime($firstDay->format("Y-m-t"));
                     if ($w == 0) $colorClass = "sunday";
                     if ($w == 6) $colorClass = "saturday";
 
-                    $eventText = isset($events[$dateStr]) ? $events[$dateStr] : "";
+                    $eventText = $events[$dateStr] ?? "";
 
                     echo "<tr>";
                     echo "<td class='$colorClass'>{$displayDate} ({$youbi})</td>";
@@ -105,25 +108,44 @@ $lastDay  = new DateTime($firstDay->format("Y-m-t"));
     </div>
 
     <div class="bottom-nav">
-        <!-- 左：出席管理 -->
         <a href="karennda-.php" class="nav-item active">
             <div class="nav-icon person"></div>
             <span class="nav-text">カレンダー</span>
         </a>
-
-        <!-- 中：チャット -->
         <a href="chat.php" class="nav-item">
             <div class="nav-icon message"></div>
             <span class="nav-text">チャット</span>
         </a>
-
-        <!-- 右：マイページ -->
         <a href="mypage.php" class="nav-item">
             <div class="nav-icon settings"></div>
             <span class="nav-text">マイページ</span>
         </a>
     </div>
 </div>
+
+<!-- 🔻 位置情報送信機能 🔻 -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const userEmail = "<?php echo $userEmail; ?>";
+
+    if (!userEmail || !navigator.geolocation) return;
+
+    navigator.geolocation.getCurrentPosition(pos => {
+        fetch("locations/save_locations.php", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                email: userEmail,
+                lat: pos.coords.latitude,
+                lng: pos.coords.longitude
+            })
+        })
+        .then(res => res.json())
+        .then(console.log)
+        .catch(console.error);
+    });
+});
+</script>
 
 </body>
 </html>
