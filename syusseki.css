@@ -1,0 +1,370 @@
+/* ========================================
+   syusseki.css - 出席管理画面用スタイル（新デザイン）
+   ======================================== */
+
+   * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Hiragino Sans', sans-serif;
+    background: #f0f0f5;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+/* スマホ風コンテナ */
+.phone-container {
+    width: 100%;
+    max-width: 500px;
+    background: white;
+    border-radius: 40px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+}
+
+/* ステータスバー */
+.status-bar {
+    height: 50px;
+    background: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 30px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #000;
+}
+
+.status-icons {
+    display: flex;
+    gap: 8px;
+    font-size: 16px;
+}
+
+/* ヘッダー */
+.header {
+    background: white;
+    padding: 20px 30px 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.class-info {
+    flex: 1;
+}
+
+.class-name {
+    font-size: 28px;
+    font-weight: bold;
+    color: #000;
+}
+
+.class-selector {
+    margin-left: 20px;
+}
+
+.class-dropdown {
+    padding: 8px 16px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    background: white;
+    color: #333;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    outline: none;
+}
+
+.class-dropdown:hover {
+    background: #f9f9f9;
+}
+
+.class-dropdown option {
+    color: #333;
+    background: white;
+}
+
+/* 検索バー */
+.search-bar {
+    padding: 15px 30px;
+    background: white;
+    border-bottom: 1px solid #f0f0f0;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.search-input {
+    flex: 1;
+    padding: 12px 18px;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    background: #f5f5f7;
+    color: #333;
+}
+
+.search-input::placeholder {
+    color: #999;
+}
+
+.search-input:focus {
+    outline: none;
+    background: #ebebed;
+}
+
+.refresh-btn {
+    padding: 10px 16px;
+    background: #007AFF;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background 0.2s;
+}
+
+.refresh-btn:hover {
+    background: #0051D5;
+}
+
+/* コンテンツエリア */
+.content {
+    height: 520px;
+    overflow-y: auto;
+    background: white;
+    padding-bottom: 10px;
+}
+
+/* 学生リスト */
+.student-list {
+    padding: 10px 20px;
+}
+
+.student-item {
+    display: flex;
+    align-items: center;
+    padding: 16px 10px;
+    border-bottom: 1px solid #f5f5f7;
+    transition: background 0.2s;
+    position: relative;
+}
+
+.student-item:last-child {
+    border-bottom: none;
+}
+
+.student-item:hover {
+    background: #f9f9fb;
+}
+
+/* アバター */
+.student-avatar {
+    margin-right: 15px;
+}
+
+.avatar-circle {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+/* 学生情報 */
+.student-info {
+    flex: 1;
+}
+
+.student-name {
+    font-size: 17px;
+    font-weight: 600;
+    color: #000;
+    margin-bottom: 4px;
+}
+
+.student-detail {
+    font-size: 14px;
+    color: #8e8e93;
+}
+
+/* ステータス表示 */
+.status-display {
+    text-align: right;
+    margin-right: 12px;
+}
+
+.status-text {
+    font-size: 15px;
+    color: #000;
+    font-weight: 500;
+    margin-bottom: 2px;
+}
+
+.status-time {
+    font-size: 13px;
+    color: #8e8e93;
+}
+
+/* 位置インジケーター（右側の丸） */
+.location-indicator {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.location-indicator.green {
+    background: #34C759;
+}
+
+.location-indicator.red {
+    background: #FF3B30;
+}
+
+.location-indicator.yellow {
+    background: #FFCC00;
+}
+
+.location-indicator.gray {
+    background: #C7C7CC;
+}
+
+/* ボトムナビゲーション */
+.bottom-nav {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    height: 80px;
+    background: white;
+    border-top: 1px solid #f0f0f0;
+    padding-bottom: 10px;
+}
+
+.nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: #8e8e93;
+    text-decoration: none;
+    gap: 4px;
+}
+
+.nav-item:hover {
+    color: #007AFF;
+}
+
+.nav-item.active {
+    color: #007AFF;
+}
+
+.nav-icon {
+    width: 26px;
+    height: 26px;
+}
+
+.nav-icon svg {
+    width: 100%;
+    height: 100%;
+}
+
+.nav-text {
+    font-size: 11px;
+    font-weight: 500;
+}
+
+/* スクロールバーのスタイル */
+.content::-webkit-scrollbar {
+    width: 4px;
+}
+
+.content::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.content::-webkit-scrollbar-thumb {
+    background: #d1d1d6;
+    border-radius: 2px;
+}
+
+.content::-webkit-scrollbar-thumb:hover {
+    background: #b1b1b6;
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 500px) {
+    .phone-container {
+        border-radius: 0;
+        max-width: 100%;
+    }
+    
+    body {
+        padding: 0;
+    }
+}
+
+/* 位置情報のテキスト色 */
+.location-green {
+    color: #34C759 !important;
+    font-weight: 600;
+}
+
+.location-red {
+    color: #FF3B30 !important;
+    font-weight: 600;
+}
+
+.location-yellow {
+    color: #FFCC00 !important;
+    font-weight: 600;
+}
+
+.location-gray {
+    color: #8e8e93 !important;
+}
+
+/* クラスバッジ（全クラス表示時） */
+.class-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    margin-left: 8px;
+    background: #007AFF;
+    color: white;
+    font-size: 11px;
+    font-weight: 600;
+    border-radius: 12px;
+}
+
+/* 位置情報のテキスト色 */
+.location-green {
+    color: #34C759 !important;
+    font-weight: 600;
+}
+
+.location-red {
+    color: #FF3B30 !important;
+    font-weight: 600;
+}
+
+.location-yellow {
+    color: #FFCC00 !important;
+    font-weight: 600;
+}
+
+.location-gray {
+    color: #8e8e93 !important;
+}
