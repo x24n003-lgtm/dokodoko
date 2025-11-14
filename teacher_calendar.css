@@ -1,0 +1,160 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+body {
+    font-family: 'Hiragino Kaku Gothic Pro', 'メイリオ', sans-serif;
+    background: #f5f5f5;
+    padding: 20px;
+}
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 10px;
+    padding: 30px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+h1 {
+    color: #333;
+    margin-bottom: 30px;
+    padding-bottom: 15px;
+    border-bottom: 3px solid #4CAF50;
+}
+.message {
+    background: #d4edda;
+    color: #155724;
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    border: 1px solid #c3e6cb;
+}
+.form-section {
+    background: #f9f9f9;
+    padding: 25px;
+    border-radius: 8px;
+    margin-bottom: 30px;
+}
+.form-section h2 {
+    color: #4CAF50;
+    margin-bottom: 20px;
+    font-size: 20px;
+}
+.form-group {
+    margin-bottom: 20px;
+}
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #555;
+    font-weight: bold;
+}
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+}
+.form-group textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+.btn {
+    padding: 12px 30px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.3s;
+}
+.btn-primary {
+    background: #4CAF50;
+    color: white;
+}
+.btn-primary:hover {
+    background: #45a049;
+}
+.btn-danger {
+    background: #f44336;
+    color: white;
+    padding: 8px 15px;
+    font-size: 14px;
+}
+.btn-danger:hover {
+    background: #da190b;
+}
+.btn-edit {
+    background: #2196F3;
+    color: white;
+    padding: 8px 15px;
+    font-size: 14px;
+    margin-right: 5px;
+}
+.btn-edit:hover {
+    background: #0b7dda;
+}
+.events-list {
+    margin-top: 30px;
+}
+.events-list h2 {
+    color: #333;
+    margin-bottom: 20px;
+    font-size: 22px;
+}
+.event-item {
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 15px;
+    transition: box-shadow 0.3s;
+}
+.event-item:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+.event-date {
+    color: #4CAF50;
+    font-weight: bold;
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+.event-title {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 8px;
+}
+.event-description {
+    color: #666;
+    font-size: 14px;
+    margin-bottom: 15px;
+}
+.event-meta {
+    font-size: 12px;
+    color: #999;
+    margin-bottom: 10px;
+}
+.event-actions {
+    display: flex;
+    gap: 10px;
+}
+.back-link {
+    display: inline-block;
+    margin-bottom: 20px;
+    color: #4CAF50;
+    text-decoration: none;
+    font-size: 16px;
+}
+.back-link:hover {
+    text-decoration: underline;
+}
+.edit-form {
+    display: none;
+    background: #fff3cd;
+    padding: 20px;
+    border-radius: 5px;
+    margin-top: 15px;
+}

@@ -72,4 +72,17 @@ body {
   button[type="submit"]:hover {
     background-color: #2f3ec9;
   }
+
+  /* 注意書き */
+.note {
+  font-size: 0.85rem;
+  color: #666;
+  margin-top: -12px;
+  margin-bottom: 18px;
+}
+
+/* フォームグループ */
+.form-group {
+  margin-bottom: 0;
+}
   

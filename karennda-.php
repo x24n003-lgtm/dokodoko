@@ -1,14 +1,6 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>カレンダーアプリ</title>
-    <link rel="stylesheet" href="homecss.css">
-</head>
-<body>
-
 <?php
+require_once 'db_config.php';
+
 // ------------------ 基本設定 ------------------
 date_default_timezone_set('Asia/Tokyo');
 
@@ -24,19 +16,39 @@ $prevMonth = date("n", $prev);
 $nextYear = date("Y", $next);
 $nextMonth = date("n", $next);
 
-// ------------------ サンプル予定 ------------------
-$events = [
-    "$year-06-02" => "php基礎演習めのり切り",
-    "$year-06-05" => "卒業研究リーダー決定",
-    "$year-06-12" => "卒業研究概要決定",
-    "$year-06-15" => "応用ネットワーク演習"
-];
+// ------------------ データベースからイベントを取得 ------------------
+$pdo = getDbConnection();
+$events = [];
+
+try {
+    // 指定された月のイベントを取得
+    $firstDay = "$year-" . str_pad($month, 2, '0', STR_PAD_LEFT) . "-01";
+    $lastDay = date("Y-m-t", strtotime($firstDay));
+    
+    $stmt = $pdo->prepare("SELECT event_date, event_title, event_description FROM calendar_events WHERE event_date BETWEEN ? AND ? ORDER BY event_date");
+    $stmt->execute([$firstDay, $lastDay]);
+    
+    while ($row = $stmt->fetch()) {
+        $events[$row['event_date']] = $row['event_title'];
+    }
+} catch (PDOException $e) {
+    error_log("イベント取得エラー: " . $e->getMessage());
+}
 
 // ------------------ カレンダー生成 ------------------
 $weekdays = ["日","月","火","水","木","金","土"];
 $firstDay = new DateTime("$year-$month-01");
 $lastDay  = new DateTime($firstDay->format("Y-m-t"));
 ?>
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>カレンダーアプリ</title>
+    <link rel="stylesheet" href="homecss.css">
+</head>
+<body>
 
 <div class="phone-container">
     <div class="status-bar">
@@ -93,29 +105,23 @@ $lastDay  = new DateTime($firstDay->format("Y-m-t"));
     </div>
 
     <div class="bottom-nav">
-        <button class="nav-item active">
-            <div class="nav-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                    <circle cx="12" cy="7" r="4"></circle>
-                </svg>
-            </div>
-        </button>
-        <button class="nav-item">
-            <div class="nav-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-                </svg>
-            </div>
-        </button>
-        <button class="nav-item">
-            <div class="nav-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="12" cy="12" r="3"></circle>
-                    <path d="M12 1v6m0 6v6m9-9h-6m-6 0H3"></path>
-                </svg>
-            </div>
-        </button>
+        <!-- 左：出席管理 -->
+        <a href="karennda-.php" class="nav-item active">
+            <div class="nav-icon person"></div>
+            <span class="nav-text">カレンダー</span>
+        </a>
+
+        <!-- 中：チャット -->
+        <a href="chat.php" class="nav-item">
+            <div class="nav-icon message"></div>
+            <span class="nav-text">チャット</span>
+        </a>
+
+        <!-- 右：マイページ -->
+        <a href="mypage.php" class="nav-item">
+            <div class="nav-icon settings"></div>
+            <span class="nav-text">マイページ</span>
+        </a>
     </div>
 </div>
 
