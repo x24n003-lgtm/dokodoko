@@ -96,6 +96,9 @@ function getLocationColor($loc) {
 }
 
 // 学生データの距離判定・表示用ステータス追加
+// 学生データの距離判定・表示用ステータス追加（安全版）
+$epsilon = 0.00001; // 緯度経度の比較用許容誤差（約1m程度）
+
 foreach ($students as &$s) {
     $lat = $s['lat'] ?? null;
     $lng = $s['lng'] ?? null;
@@ -103,11 +106,13 @@ foreach ($students as &$s) {
     $home_lng = $s['home_lng'] ?? null;
 
     if ($lat !== null && $lng !== null) {
+        // 学校までの距離
         $distance_to_school = calculateDistance($school_lat, $school_lng, $lat, $lng);
 
         if ($distance_to_school <= $school_radius) {
             $s['real_location'] = 'school'; // 学校内
-        } elseif ($home_lat !== null && $home_lng !== null && $lat == $home_lat && $lng == $home_lng) {
+        } elseif ($home_lat !== null && $home_lng !== null &&
+                  abs($lat - $home_lat) < $epsilon && abs($lng - $home_lng) < $epsilon) {
             $s['real_location'] = 'home'; // 自宅
         } else {
             $s['real_location'] = 'other'; // 固定住所じゃない
@@ -119,9 +124,11 @@ foreach ($students as &$s) {
         $s['distance'] = null;
     }
 
+    // 表示用テキスト
     $s['display_status'] = getLocationText($s['real_location'], $s['distance']);
 }
 unset($s);
+
 ?>
 
 
