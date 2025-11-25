@@ -123,7 +123,55 @@ if ($result->num_rows > 0) {
         "email" => $email,
         "lat" => $lat,
         "lng" => $lng
-    ], JSON_UNESCAPED_UNICODE);
+    ], JSON_UNESCAPED_UNICODE);<?php
+    ini_set('display_errors', 1);
+    error_reporting(E_ALL);
+    
+    session_start();
+    
+    header("Content-Type: application/json");
+    
+    if (!isset($_POST['email']) || !isset($_POST['lat']) || !isset($_POST['lng'])) {
+        echo json_encode(["error" => "必要なデータが不足しています"]);
+        exit;
+    }
+    
+    $email = $_POST['email'];
+    $lat = $_POST['lat'];
+    $lng = $_POST['lng'];
+    
+    $conn = new mysqli("172.16.199.21", "x24n007", "n051211", "dokodoko");
+    $conn->set_charset("utf8mb4");
+    
+    if ($conn->connect_error) {
+        echo json_encode(["error" => "DB接続失敗"]);
+        exit;
+    }
+    
+    // lat/lng（現在位置）だけ更新
+    $stmt = $conn->prepare("
+        UPDATE users 
+        SET lat = ?, lng = ?, location_updated_at = NOW()
+        WHERE email = ?
+    ");
+    
+    $stmt->bind_param("dds", $lat, $lng, $email);
+    
+    if ($stmt->execute()) {
+        echo json_encode([
+            "success" => "位置情報を更新しました",
+            "email" => $email,
+            "lat" => $lat,
+            "lng" => $lng
+        ]);
+    } else {
+        echo json_encode([
+            "error" => "更新失敗: " . $stmt->error
+        ]);
+    }
+    
+    ?>
+    
 }
 
 $stmt->close();
