@@ -51,11 +51,15 @@ h1 {
 <div id="list">読み込み中...</div>
 
 <script>
-// DBからデータ取得
 function loadLocations() {
   fetch("compare_locations.php")
-    .then(res => res.json())
+    .then(response => {
+      if (!response.ok) throw new Error("HTTPエラー: " + response.status);
+      return response.json();
+    })
     .then(data => {
+      console.log("受信データ:", data);
+
       const list = document.getElementById("list");
       list.innerHTML = "";
 
@@ -69,17 +73,19 @@ function loadLocations() {
         div.className = "marker";
 
         const dot = document.createElement("div");
-        // ステータスに応じて色分け
-        if (loc.status === "校内") {
+
+        const status = String(loc.status || "").trim();
+
+        if (status.includes("校内")) {
           dot.className = "marker-dot status-campus";
-        } else if (loc.status === "校外") {
+        } else if (status.includes("校外")) {
           dot.className = "marker-dot status-outside";
         } else {
           dot.className = "marker-dot status-other";
         }
 
         const name = document.createElement("span");
-        name.textContent = loc.name;
+        name.textContent = loc.name || "不明なユーザー";
 
         div.appendChild(dot);
         div.appendChild(name);
@@ -88,7 +94,8 @@ function loadLocations() {
     })
     .catch(err => {
       console.error("取得エラー:", err);
-      document.getElementById("list").textContent = "データの取得に失敗しました。";
+      document.getElementById("list").textContent =
+        "データの取得に失敗しました。 (詳細はコンソールを確認)";
     });
 }
 
