@@ -1,5 +1,4 @@
 <?php
-require_once 'upload_config.php';
 session_start();
 
 // 教員のログインチェック
@@ -58,36 +57,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['logo_image'])) {
     try {
         $file = $_FILES['logo_image'];
         if ($file['error'] === UPLOAD_ERR_OK) {
-            // アップロードディレクトリを確保
-            ensureUploadDirectory(LOGO_DIR);
+            $uploadDir = 'uploads/logos/';
+            if (!file_exists($uploadDir)) mkdir($uploadDir, 0777, true);
 
             $fileExtension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
             $allowedExtensions = ['jpg','jpeg','png','gif'];
             if (!in_array($fileExtension, $allowedExtensions)) throw new Exception('jpg, jpeg, png, gif のみ可能です。');
 
             $fileName = 'logo_'.$userId.'_'.time().'.'.$fileExtension;
-            $uploadPath = LOGO_DIR.$fileName;
-
-            // 古い画像を削除
-            $old_stmt = $pdo->prepare("SELECT logo_image FROM users WHERE id=:user_id");
-            $old_stmt->execute([':user_id'=>$userId]);
-            $old_data = $old_stmt->fetch();
-            if ($old_data && $old_data['logo_image']) {
-                $oldFilePath = $old_data['logo_image'];
-                if (!file_exists($oldFilePath)) {
-                    $oldFilePath = LOGO_DIR . basename($old_data['logo_image']);
-                }
-                if (file_exists($oldFilePath)) {
-                    unlink($oldFilePath);
-                }
-            }
+            $uploadPath = $uploadDir.$fileName;
 
             if (move_uploaded_file($file['tmp_name'], $uploadPath)) {
-                // DBにはファイル名のみを保存
-                $dbPath = 'uploads/logos/' . $fileName;
-                
+                $old_stmt = $pdo->prepare("SELECT logo_image FROM users WHERE id=:user_id");
+                $old_stmt->execute([':user_id'=>$userId]);
+                $old_data = $old_stmt->fetch();
+                if ($old_data && $old_data['logo_image'] && file_exists($old_data['logo_image'])) unlink($old_data['logo_image']);
+
                 $update_stmt = $pdo->prepare("UPDATE users SET logo_image=:logo_image WHERE id=:user_id");
-                $update_stmt->execute([':logo_image'=>$dbPath, ':user_id'=>$userId]);
+                $update_stmt->execute([':logo_image'=>$uploadPath, ':user_id'=>$userId]);
 
                 $message = 'プロフィール画像が更新されました';
                 $messageType = 'success';
@@ -106,15 +93,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_logo'])) {
         $stmt = $pdo->prepare("SELECT logo_image FROM users WHERE id=:user_id");
         $stmt->execute([':user_id'=>$userId]);
         $data = $stmt->fetch();
-        if ($data && $data['logo_image']) {
-            $filePath = $data['logo_image'];
-            if (!file_exists($filePath)) {
-                $filePath = LOGO_DIR . basename($data['logo_image']);
-            }
-            if (file_exists($filePath)) {
-                unlink($filePath);
-            }
-        }
+        if ($data && $data['logo_image'] && file_exists($data['logo_image'])) unlink($data['logo_image']);
         $del_stmt = $pdo->prepare("UPDATE users SET logo_image=NULL WHERE id=:user_id");
         $del_stmt->execute([':user_id'=>$userId]);
 
@@ -135,7 +114,7 @@ $userName = $profile_data['username'] ?? '';
 $logoImage = $profile_data['logo_image'] ?? '';
 
 // デフォルトアイコン
-$defaultIcon = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="%23bdbdbd"/><circle cx="50" cy="37" r="15" fill="%23ffffff"/><path d="M 30 65 Q 30 55 50 55 Q 70 55 70 65 L 70 85 Q 70 90 50 90 Q 30 90 30 85 Z" fill="%23ffffff"/></svg>';
+$defaultIcon = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="%23bdbdbd"/><circle cx="50" cy="35" r="15" fill="%23ffffff"/><path d="M 30 75 Q 30 55 50 55 Q 70 55 70 75 Z" fill="%23ffffff"/></svg>';
 ?>
 <!DOCTYPE html>
 <html lang="ja">
@@ -187,6 +166,22 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif
 .cancel-btn { background:#6c757d; }
 .cancel-btn:hover { background:#5a6268; }
 
+/* 換算値ボタン */
+.kansanti-btn {
+    padding:8px 12px;
+    font-size:0.9rem;
+    background:#ff9800;
+    color:#fff;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+    transition:background 0.3s;
+    white-space:nowrap;
+}
+.kansanti-btn:hover {
+    background:#fb8c00;
+}
+
 /* ===== カレンダー管理 ===== */
 .calendar-management { text-align:center; margin-bottom:30px; }
 .calendar-management h3 { font-size:1.1rem; margin-bottom:5px; }
@@ -219,9 +214,8 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif
 
     <!-- プロフィール画像 -->
     <div class="logo-section">
-
         <div class="logo-preview" onclick="triggerFileSelect()">
-            <?php if($logoImage && imageExists($logoImage)): ?>
+            <?php if($logoImage && file_exists($logoImage)): ?>
                 <img src="<?php echo htmlspecialchars($logoImage); ?>?t=<?php echo time(); ?>" id="logoPreview">
             <?php else: ?>
                 <img src="<?php echo $defaultIcon; ?>" id="logoPreview">
@@ -233,7 +227,7 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif
             <input type="file" name="logo_image" id="logoInput" class="logo-file-input" onchange="previewAndSubmit()">
         </form>
 
-        <?php if($logoImage && imageExists($logoImage)): ?>
+        <?php if($logoImage && file_exists($logoImage)): ?>
             <form method="POST" onsubmit="return confirm('本当に削除しますか？');">
                 <input type="hidden" name="delete_logo" value="1">
                 <button type="submit" class="logo-btn logo-delete-btn">🗑️ 画像を削除</button>
@@ -244,6 +238,7 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif
     <!-- プロフィール詳細 -->
     <div class="profile-details">
         <form method="POST" id="usernameForm">
+            <!-- 氏名 -->
             <div class="detail-row">
                 <span class="detail-label">氏名</span>
                 <div class="detail-value">
@@ -251,6 +246,24 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif
                     <button type="button" class="edit-btn" id="editBtn" onclick="enableEdit()">✏️ 編集</button>
                     <button type="submit" name="update_username" class="edit-btn save-btn" id="saveBtn" style="display:none;">💾 保存</button>
                     <button type="button" class="edit-btn cancel-btn" id="cancelBtn" style="display:none;" onclick="cancelEdit()">✕</button>
+                </div>
+            </div>
+
+            <!-- 生年月日（今はダミー。必要ならDBから取得するようにしてOK） -->
+            <div class="detail-row">
+                <span class="detail-label">生年月日</span>
+                <div class="detail-value">
+                    <input type="date" id="birthdayInput" value="2000-12-01" readonly>
+                </div>
+            </div>
+
+            <!-- 換算値設定ボタン（生年月日の下） -->
+            <div class="detail-row">
+                <span class="detail-label">換算値</span>
+                <div class="detail-value">
+                    <button type="button" class="kansanti-btn" onclick="goToKansanti()">
+                        生徒の換算値を設定する
+                    </button>
                 </div>
             </div>
         </form>
@@ -267,7 +280,7 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif
             <div class="nav-icon person"></div>
             <span class="nav-text">出席</span>
         </a>
-        <a href="teachatp.php" class="nav-item">
+        <a href="teacherchat.php" class="nav-item">
             <div class="nav-icon message"></div>
             <span class="nav-text">チャット</span>
         </a>
@@ -343,6 +356,13 @@ document.getElementById('usernameForm').addEventListener('submit', function(e) {
         return false;
     }
 });
+
+// 換算値設定画面へ遷移
+function goToKansanti() {
+    // 今は固定でkansanti.phpに遷移
+    // 生徒ごとのIDを渡したい場合は、ここに ?student_id=◯ を付けるイメージ
+    window.location.href = 'kansanti.php';
+}
 </script>
 </body>
 </html>

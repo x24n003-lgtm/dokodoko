@@ -2,7 +2,7 @@
 // エラー表示を有効化
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
-
+ 
 session_start();
 ?>
 <!DOCTYPE html>
@@ -16,27 +16,27 @@ session_start();
 <body>
     <div class="register-container">
         <h2>🎓 新規会員登録</h2>
-        
+       
         <?php
         if (isset($_SESSION['error'])) {
             echo '<div class="message error">' . htmlspecialchars($_SESSION['error']) . '</div>';
             unset($_SESSION['error']);
         }
         ?>
-        
+       
         <form action="register.php" method="POST" id="registerForm">
-
+ 
             <!-- GPS hidden -->
             <input type="hidden" id="lat" name="lat">
             <input type="hidden" id="lng" name="lng">
-
+ 
             <div class="form-group">
                 <label for="email">メールアドレス *</label>
-                <input type="email" id="email" name="email" required 
+                <input type="email" id="email" name="email" required
                        placeholder="学生: x12345@... / 教員: teacher@...">
                 <p class="note">※ 学生の方はxから始まるメールアドレスを入力</p>
             </div>
-            
+           
             <div class="form-group">
                 <label for="username">ユーザー名 *</label>
                 <input type="text" id="username" name="username" required placeholder="山田太郎">
@@ -46,7 +46,7 @@ session_start();
                 <label for="password">パスワード *</label>
                 <input type="password" id="password" name="password" required minlength="6" placeholder="6文字以上">
             </div>
-            
+           
             <div class="form-group">
                 <label for="password_confirm">パスワード確認 *</label>
                 <input type="password" id="password_confirm" name="password_confirm" required minlength="6" placeholder="もう一度入力">
@@ -71,7 +71,7 @@ session_start();
                 <label for="home_address">自宅住所 *</label>
                 <input type="text" id="home_address" name="home_address" required placeholder="東京都渋谷区...">
             </div>
-
+ 
             <div class="form-group" id="classField" style="display: none;">
                 <label for="class_name">クラス *</label>
                 <select id="class_name" name="class_name">
@@ -88,20 +88,20 @@ session_start();
      
             <button type="submit" class="register-btn">登録する</button>
         </form>
-        
+       
         <div class="login-link">
             <p>既にアカウントをお持ちの方は<br>
             <a href="login.php">こちらからログイン</a></p>
         </div>
     </div>
-
+ 
     <script>
         // 学生判定してクラス表示/非表示
         document.getElementById('email').addEventListener('input', function(e) {
             const email = e.target.value.toLowerCase();
             const classField = document.getElementById('classField');
             const classSelect = document.getElementById('class_name');
-            
+           
             if (email.startsWith('x')) {
                 classField.style.display = 'block';
                 classSelect.setAttribute('required', 'required');
@@ -111,17 +111,17 @@ session_start();
                 classSelect.value = '';
             }
         });
-
+ 
         // GPSを取得してhiddenに入れる → 送信
         function getGPSAndSubmit(e) {
             e.preventDefault();
-
+ 
             if (!navigator.geolocation) {
                 alert("GPSが使えません。位置情報なしで登録します。");
                 document.getElementById('registerForm').submit();
                 return;
             }
-
+ 
             navigator.geolocation.getCurrentPosition(function(pos) {
                 document.getElementById("lat").value = pos.coords.latitude;
                 document.getElementById("lng").value = pos.coords.longitude;
@@ -131,7 +131,7 @@ session_start();
                 document.getElementById('registerForm').submit();
             });
         }
-
+ 
         // 送信前チェック＋GPS処理
         document.getElementById('registerForm').addEventListener('submit', function(e) {
             const password = document.getElementById('password').value;
@@ -139,30 +139,30 @@ session_start();
             const gender = document.getElementById('gender').value;
             const email = document.getElementById('email').value.toLowerCase();
             const className = document.getElementById('class_name').value;
-
+ 
             if (password !== passwordConfirm) {
                 e.preventDefault();
                 alert('パスワードが一致しません');
                 return;
             }
-
+ 
             if (gender === '') {
                 e.preventDefault();
                 alert('性別を選択してください');
                 return;
             }
-
+ 
             if (email.startsWith('x') && className === '') {
                 e.preventDefault();
                 alert('クラスを選択してください');
                 return;
             }
-
+ 
             if (!confirm('この内容で登録しますか？')) {
                 e.preventDefault();
                 return;
             }
-
+ 
             // GPS取得して送信
             getGPSAndSubmit(e);
         });

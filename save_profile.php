@@ -1,15 +1,16 @@
 <?php
+require_once 'upload_config.php';
 session_start();
 
 // データベース接続設定
-$host = "172.16.199.21";  // Linux MariaDB の IP
+$host = "172.16.199.21";
 $user = "x24n007";
 $pass = "n051211";
-$dbname = "dokodoko";  // ← 名前を $dbname に変更
+$dbname = "dokodoko";
 $port = 3306;
 
 try {
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $username, $password);
+    $pdo = new PDO("mysql:host=$host;port=$port;dbname=$dbname;charset=utf8mb4", $user, $pass);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 } catch (PDOException $e) {
     echo json_encode(['success' => false, 'error' => 'データベース接続エラー']);
@@ -19,15 +20,13 @@ try {
 // レスポンスヘッダー設定
 header('Content-Type: application/json');
 
-// ログインチェック（必要に応じて）
-// if (!isset($_SESSION['user_id'])) {
-//     echo json_encode(['success' => false, 'error' => '認証が必要です']);
-//     exit;
-// }
-// $userId = $_SESSION['user_id'];
+// ログインチェック
+if (!isset($_SESSION['user_id'])) {
+    echo json_encode(['success' => false, 'error' => '認証が必要です']);
+    exit;
+}
 
-// 仮のユーザーID（実際はセッションから取得）
-$userId = 1;
+$userId = $_SESSION['user_id'];
 
 // POSTリクエストのチェック
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -46,35 +45,22 @@ if (!$data) {
 
 // バリデーション
 $name = isset($data['name']) ? trim($data['name']) : null;
-$birthday = isset($data['birthday']) ? trim($data['birthday']) : null;
 
 if (empty($name)) {
     echo json_encode(['success' => false, 'error' => '氏名を入力してください']);
     exit;
 }
 
-if (empty($birthday)) {
-    echo json_encode(['success' => false, 'error' => '生年月日を入力してください']);
-    exit;
-}
-
-// 生年月日の形式チェック
-if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $birthday)) {
-    echo json_encode(['success' => false, 'error' => '生年月日の形式が正しくありません']);
-    exit;
-}
-
 try {
-    // ユーザー情報を更新
+    // ユーザー情報を更新（usernameカラムを使用）
     $stmt = $pdo->prepare("
         UPDATE users 
-        SET name = :name, birthday = :birthday, updated_at = NOW() 
+        SET username = :name
         WHERE id = :user_id
     ");
     
     $result = $stmt->execute([
         'name' => $name,
-        'birthday' => $birthday,
         'user_id' => $userId
     ]);
     
@@ -83,8 +69,7 @@ try {
             'success' => true,
             'message' => 'プロフィールが保存されました',
             'data' => [
-                'name' => $name,
-                'birthday' => $birthday
+                'name' => $name
             ]
         ]);
     } else {

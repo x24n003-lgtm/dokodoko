@@ -23,20 +23,31 @@ try {
     die("DB接続エラー: " . $e->getMessage());
 }
 
-// ロゴ取得（任意）
-$logo_stmt = $pdo->prepare("SELECT logo_image FROM users WHERE id=:teacher_id AND user_type='teacher'");
+// 教員のプロフィール画像取得
+$logo_stmt = $pdo->prepare("SELECT username, logo_image FROM users WHERE id=:teacher_id AND user_type='teacher'");
 $logo_stmt->execute([':teacher_id' => $_SESSION['user_id']]);
-$logo_data = $logo_stmt->fetch();
-$logo_image = $logo_data['logo_image'] ?? null;
+$teacher_data = $logo_stmt->fetch();
+$teacher_name = $teacher_data['username'] ?? '今どこ';
+$logo_image = $teacher_data['logo_image'] ?? null;
+
+// デフォルトアイコン
+$default_icon = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="%23e0e0e0"/><circle cx="50" cy="35" r="20" fill="%23999"/><path d="M20 80 Q20 60 50 60 Q80 60 80 80 Z" fill="%23999"/></svg>';
+
+// 教員のプロフィール画像を決定
+if ($logo_image && file_exists($logo_image)) {
+    $display_image = $logo_image;
+} else {
+    $display_image = $default_icon;
+}
 
 // クラス選択
 $selected_class = $_GET['class'] ?? 'all';
 $classes = $pdo->query("SELECT DISTINCT class_name FROM users WHERE user_type='student' AND class_name IS NOT NULL ORDER BY class_name")->fetchAll(PDO::FETCH_COLUMN);
 
-// 学生データ取得（home_lat / home_lng も取得）
+// 学生データ取得（logo_imageも取得）
 if ($selected_class === 'all') {
     $stmt = $pdo->prepare("
-        SELECT id, username as name, class_name, lat, lng, home_lat, home_lng
+        SELECT id, username as name, class_name, logo_image, lat, lng, home_lat, home_lng
         FROM users
         WHERE user_type='student'
         ORDER BY class_name, id
@@ -44,7 +55,7 @@ if ($selected_class === 'all') {
     $stmt->execute();
 } else {
     $stmt = $pdo->prepare("
-        SELECT id, username as name, class_name, lat, lng, home_lat, home_lng
+        SELECT id, username as name, class_name, logo_image, lat, lng, home_lat, home_lng
         FROM users
         WHERE user_type='student' AND class_name=:class_name
         ORDER BY id
@@ -95,9 +106,8 @@ function getLocationColor($loc) {
     };
 }
 
-// 学生データの距離判定・表示用ステータス追加
-// 学生データの距離判定・表示用ステータス追加（安全版）
-$epsilon = 0.00001; // 緯度経度の比較用許容誤差（約1m程度）
+// 学生データの距離判定
+$epsilon = 0.00001;
 
 foreach ($students as &$s) {
     $lat = $s['lat'] ?? null;
@@ -106,16 +116,15 @@ foreach ($students as &$s) {
     $home_lng = $s['home_lng'] ?? null;
 
     if ($lat !== null && $lng !== null) {
-        // 学校までの距離
         $distance_to_school = calculateDistance($school_lat, $school_lng, $lat, $lng);
 
         if ($distance_to_school <= $school_radius) {
-            $s['real_location'] = 'school'; // 学校内
+            $s['real_location'] = 'school';
         } elseif ($home_lat !== null && $home_lng !== null &&
                   abs($lat - $home_lat) < $epsilon && abs($lng - $home_lng) < $epsilon) {
-            $s['real_location'] = 'home'; // 自宅
+            $s['real_location'] = 'home';
         } else {
-            $s['real_location'] = 'other'; // 固定住所じゃない
+            $s['real_location'] = 'other';
         }
 
         $s['distance'] = $distance_to_school;
@@ -124,14 +133,11 @@ foreach ($students as &$s) {
         $s['distance'] = null;
     }
 
-    // 表示用テキスト
     $s['display_status'] = getLocationText($s['real_location'], $s['distance']);
 }
 unset($s);
 
 ?>
-
-
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -139,23 +145,6 @@ unset($s);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>出席管理</title>
     <link rel="stylesheet" href="syusseki.css">
-    <style>
-        /* ロゴ画像用のスタイル */
-        .header-logo {
-            height: 30px;
-            width: auto;
-            max-width: 40px;
-            margin-right: 5px;
-            vertical-align: middle;
-            object-fit: contain;
-        }
-        
-        .class-info {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-    </style>
 </head>
 <body>
 
@@ -173,11 +162,9 @@ unset($s);
     <!-- ヘッダー -->
     <div class="header">
         <div class="class-info">
-            <?php if ($logo_image && file_exists($logo_image)): ?>
-                <img src="<?php echo htmlspecialchars($logo_image); ?>" alt="ロゴ" class="header-logo">
-            <?php else: ?>
-                <span class="class-name">橋</span>
-            <?php endif; ?>
+            <img src="<?php echo htmlspecialchars($display_image); ?>?t=<?php echo time(); ?>" 
+                 alt="プロフィール" 
+                 class="header-profile-icon">
             <span class="class-name">今どこ</span>
         </div>
         <div class="class-selector">
@@ -206,10 +193,22 @@ unset($s);
     <!-- 生徒リスト -->
     <div class="content">
         <div class="student-list" id="studentList">
-            <?php foreach ($students as $student): ?>
+            <?php foreach ($students as $student):
+                // 学生のプロフィール画像を設定
+                $student_image = $student['logo_image'] ?? '';
+                if (empty($student_image) || !file_exists($student_image)) {
+                    $student_image = null;
+                }
+            ?>
                 <div class="student-item" data-name="<?php echo htmlspecialchars($student['name']); ?>">
                     <div class="student-avatar">
-                        <div class="avatar-circle"></div>
+                        <?php if ($student_image): ?>
+                            <img src="<?php echo htmlspecialchars($student_image); ?>?t=<?php echo time(); ?>" 
+                                 alt="<?php echo htmlspecialchars($student['name']); ?>"
+                                 onerror="this.style.display='none'; this.parentElement.innerHTML='<div class=\'avatar-circle\'>👤</div>';">
+                        <?php else: ?>
+                            <div class="avatar-circle">👤</div>
+                        <?php endif; ?>
                     </div>
 
                     <div class="student-info">
@@ -262,7 +261,7 @@ unset($s);
             </div>
             <span class="nav-text">出席</span>
         </button>
-        <a href="teacherchat.php" class="nav-item">
+        <a href="teachatp.php" class="nav-item">
             <div class="nav-icon">
                 <svg viewBox="0 0 24 24" fill="currentColor">
                     <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
