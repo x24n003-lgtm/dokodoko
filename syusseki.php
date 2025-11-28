@@ -148,6 +148,7 @@ unset($s);
 </head>
 <body>
 
+
 <div class="phone-container">
     <!-- ステータスバー -->
     <div class="status-bar">
@@ -200,7 +201,9 @@ unset($s);
                     $student_image = null;
                 }
             ?>
-                <div class="student-item" data-name="<?php echo htmlspecialchars($student['name']); ?>">
+               <div class="student-item"
+                    data-id="<?php echo $student['id']; ?>"
+                    data-name="<?php echo htmlspecialchars($student['name']); ?>">
                     <div class="student-avatar">
                         <?php if ($student_image): ?>
                             <img src="<?php echo htmlspecialchars($student_image); ?>?t=<?php echo time(); ?>" 
@@ -281,21 +284,66 @@ unset($s);
     </div>
 </div>
 
+<!-- Google Maps API を読み込む -->
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA2-Yo-Z_8bTG8KKCSf7fOTlH026W5wDwg"></script>
+
 <script>
-// リアルタイム検索機能
-document.getElementById('searchInput').addEventListener('input', function(e) {
-    const searchText = e.target.value.toLowerCase();
-    const studentItems = document.querySelectorAll('.student-item');
-    
-    studentItems.forEach(item => {
-        const name = item.dataset.name.toLowerCase();
-        if (name.includes(searchText)) {
-            item.style.display = 'flex';
-        } else {
-            item.style.display = 'none';
-        }
+// 学校座標
+const SCHOOL_LAT = 35.704517;
+const SCHOOL_LNG = 139.984413;
+
+// 生徒位置情報
+const studentPositions = <?php echo json_encode(
+    array_map(function($s){
+        return [
+            "id" => $s["id"],
+            "lat" => $s["lat"],
+            "lng" => $s["lng"],
+        ];
+    }, $students)
+); ?>;
+
+// DirectionsService を作成
+const directionsService = new google.maps.DirectionsService();
+
+// 秒→分
+function secToMin(sec) {
+    return Math.ceil(sec / 60);
+}
+
+// 徒歩時間計算
+function calcTravelTimes() {
+    studentPositions.forEach(stu => {
+        if (!stu.lat || !stu.lng) return;
+
+        directionsService.route(
+            {
+                origin: { lat: parseFloat(stu.lat), lng: parseFloat(stu.lng) },
+                destination: { lat: SCHOOL_LAT, lng: SCHOOL_LNG },
+                travelMode: google.maps.TravelMode.WALKING,
+            },
+            (result, status) => {
+                if (status === 'OK') {
+                    const durationSec = result.routes[0].legs[0].duration.value;
+                    const min = secToMin(durationSec);
+
+                    const item = document.querySelector(`.student-item[data-id="${stu.id}"]`);
+                    if (item) {
+                        let box = item.querySelector(".arrival-time");
+                        if (!box) {
+                            box = document.createElement("div");
+                            box.className = "arrival-time";
+                            item.querySelector(".student-info").appendChild(box);
+                        }
+                        box.innerHTML = `学校まで ${min}分`;
+                    }
+                }
+            }
+        );
     });
-});
+}
+
+calcTravelTimes();
 </script>
 
 </body>
