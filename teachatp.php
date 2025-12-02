@@ -127,7 +127,7 @@ if (isset($_GET['user_id'])) {
     $target_user_id = intval($_GET['user_id']);
     try {
         $chat_id = getOrCreateChatRoom($pdo, $current_user_id, $target_user_id);
-        header("Location: teachatroom.php?chat_id=$chat_id");
+        header("Location: chatroom.php?chat_id=$chat_id");
         exit;
     } catch (PDOException $e) {
         echo "エラー: " . $e->getMessage();
@@ -204,8 +204,8 @@ if (isset($_GET['user_id'])) {
             <img src="<?php echo htmlspecialchars($current_user_image); ?>?t=<?php echo time(); ?>" 
                  alt="プロフィール" 
                  class="title-image"
-                 onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-            <span class="avatar-placeholder" style="display:none;">👤</span>
+                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+            <span class="avatar-placeholder" style="display:none; width:50px; height:50px; border-radius:50%; background:#e0e0e0; align-items:center; justify-content:center;">👤</span>
             <h1><?php echo htmlspecialchars($current_user_name); ?> チャット</h1>
         </div>
  

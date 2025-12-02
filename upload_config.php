@@ -1,32 +1,26 @@
 <?php
 /**
- * アップロード設定ファイル
- * グループ開発用：ローカルとサーバーの環境を自動判定
+ * アップロード設定ファイル（ローカル & Linux サーバー両対応）
  */
 
-// サーバーの種類を判定
 function isLinuxServer() {
     return stripos(PHP_OS, 'LINUX') !== false;
 }
 
-// アップロードディレクトリの設定
+// ===== 1. アップロード基準ディレクトリ =====
 if (isLinuxServer()) {
-    // Linuxサーバー環境
     define('UPLOAD_BASE_DIR', '/var/www/html/dokodoko/uploads/');
     define('UPLOAD_BASE_URL', 'http://172.16.199.21/dokodoko/uploads/');
 } else {
-    // Windowsローカル環境（開発用）
     define('UPLOAD_BASE_DIR', __DIR__ . '/uploads/');
     define('UPLOAD_BASE_URL', 'http://localhost/dokodoko/uploads/');
 }
 
-// ロゴ画像用ディレクトリ
+// ===== 2. ロゴ用 =====
 define('LOGO_DIR', UPLOAD_BASE_DIR . 'logos/');
 define('LOGO_URL', UPLOAD_BASE_URL . 'logos/');
 
-/**
- * アップロードディレクトリを作成（存在しない場合）
- */
+// ===== 3. ディレクトリ作成 =====
 function ensureUploadDirectory($dir) {
     if (!file_exists($dir)) {
         mkdir($dir, 0777, true);
@@ -34,41 +28,34 @@ function ensureUploadDirectory($dir) {
     }
 }
 
-/**
- * 画像パスをURLに変換
- */
-function getImageUrl($imagePath) {
-    if (empty($imagePath)) {
-        return 'default_icon.png';
+// ===== 4. DB に保存されたパス → 表示用 URL に変換 =====
+function getImageUrl($fileName) {
+    if (empty($fileName)) return 'default_icon.png';
+
+    // uploads/logos/xxxx.jpg のように相対パスで保存されている場合
+    if (strpos($fileName, 'uploads/') === 0) {
+        return UPLOAD_BASE_URL . substr($fileName, strlen('uploads/'));
     }
-    
-    // 絶対パスの場合はURLに変換
-    if (strpos($imagePath, UPLOAD_BASE_DIR) === 0) {
-        return str_replace(UPLOAD_BASE_DIR, UPLOAD_BASE_URL, $imagePath);
+
+    // ただのファイル名だけの場合（logo_xxx.jpg）
+    if (!str_contains($fileName, '/')) {
+        return LOGO_URL . $fileName;
     }
-    
-    // 相対パスの場合はそのまま返す
-    return $imagePath;
+
+    // それ以外（安全のため）
+    return $fileName;
 }
 
-/**
- * ファイルの存在確認（サーバー/ローカル両対応）
- */
-function imageExists($imagePath) {
-    if (empty($imagePath)) {
-        return false;
-    }
-    
-    // 絶対パスの場合
-    if (file_exists($imagePath)) {
-        return true;
-    }
-    
-    // 相対パスの場合
-    if (file_exists(__DIR__ . '/' . $imagePath)) {
-        return true;
-    }
-    
+// ===== 5. ファイル存在チェック =====
+function imageExists($fileName) {
+    if (empty($fileName)) return false;
+
+    // uploads/logos/xxx.jpg の場合
+    if (file_exists(UPLOAD_BASE_DIR . $fileName)) return true;
+
+    // logos/xxx.jpg の場合
+    if (file_exists(LOGO_DIR . basename($fileName))) return true;
+
     return false;
 }
 ?>

@@ -99,7 +99,7 @@ try {
         <!-- ヘッダー -->
         <header class="header">
             <div class="header-left">
-                <a href="teachatp.php" class="back-button">←</a>
+                <a href="chatp.php" class="back-button">←</a>
             </div>
             <div class="header-center">
                 <div class="chat-avatar">👤</div>

@@ -57,46 +57,48 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_username'])) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['logo_image'])) {
     try {
         $file = $_FILES['logo_image'];
+
         if ($file['error'] === UPLOAD_ERR_OK) {
-            // アップロードディレクトリを確保
+
             ensureUploadDirectory(LOGO_DIR);
 
-            $fileExtension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-            $allowedExtensions = ['jpg','jpeg','png','gif'];
-            if (!in_array($fileExtension, $allowedExtensions)) throw new Exception('jpg, jpeg, png, gif のみ可能です。');
-
-            $fileName = 'logo_'.$userId.'_'.time().'.'.$fileExtension;
-            $uploadPath = LOGO_DIR.$fileName;
-
-            // 古い画像を削除
-            $old_stmt = $pdo->prepare("SELECT logo_image FROM users WHERE id=:user_id");
-            $old_stmt->execute([':user_id'=>$userId]);
-            $old_data = $old_stmt->fetch();
-            if ($old_data && $old_data['logo_image']) {
-                $oldFilePath = $old_data['logo_image'];
-                if (!file_exists($oldFilePath)) {
-                    $oldFilePath = LOGO_DIR . basename($old_data['logo_image']);
-                }
-                if (file_exists($oldFilePath)) {
-                    unlink($oldFilePath);
-                }
+            // 拡張子チェック
+            $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+            $allowed = ['jpg','jpeg','png','gif'];
+            if (!in_array($ext, $allowed)) {
+                throw new Exception('jpg, jpeg, png, gif のみアップロードできます');
             }
 
-            if (move_uploaded_file($file['tmp_name'], $uploadPath)) {
-                // DBにはファイル名のみを保存
-                $dbPath = 'uploads/logos/' . $fileName;
-                
-                $update_stmt = $pdo->prepare("UPDATE users SET logo_image=:logo_image WHERE id=:user_id");
-                $update_stmt->execute([':logo_image'=>$dbPath, ':user_id'=>$userId]);
+            // 保存ファイル名
+            $fileName = 'logo_'.$userId.'_'.time().'.'.$ext;
+            $savePath = LOGO_DIR . $fileName;     // 物理パス
+            $dbPath   = LOGO_URL . $fileName;     // Web 用パス ← DB に保存するのはこっち
 
-                $message = 'プロフィール画像が更新されました';
-                $messageType = 'success';
-            } else throw new Exception('アップロードに失敗しました。');
+            // 古い画像削除
+            $stmt = $pdo->prepare("SELECT logo_image FROM users WHERE id=:uid");
+            $stmt->execute([':uid'=>$userId]);
+            $old = $stmt->fetchColumn();
+
+            if ($old && file_exists(__DIR__ . '/' . $old)) {
+                unlink(__DIR__ . '/' . $old);
+            }
+
+            // 保存
+            if (!move_uploaded_file($file['tmp_name'], $savePath)) {
+                throw new Exception('画像保存に失敗しました');
+            }
+
+            // DB へ保存
+            $up = $pdo->prepare("UPDATE users SET logo_image=:img WHERE id=:uid");
+            $up->execute([':img'=>$dbPath, ':uid'=>$userId]);
+
+            $message = "プロフィール画像が更新されました";
+            $messageType = "success";
         }
+
     } catch (Exception $e) {
-        $message = 'エラー: '.$e->getMessage();
-        $messageType = 'error';
-        error_log("画像アップロードエラー: ".$e->getMessage());
+        $message = "エラー: ".$e->getMessage();
+        $messageType = "error";
     }
 }
 
@@ -220,14 +222,14 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif
     <!-- プロフィール画像 -->
     <div class="logo-section">
 
-        <div class="logo-preview" onclick="triggerFileSelect()">
-            <?php if($logoImage && imageExists($logoImage)): ?>
-                <img src="<?php echo htmlspecialchars($logoImage); ?>?t=<?php echo time(); ?>" id="logoPreview">
-            <?php else: ?>
-                <img src="<?php echo $defaultIcon; ?>" id="logoPreview">
-            <?php endif; ?>
-            <div class="edit-overlay">📷</div>
-        </div>
+    <div class="logo-preview" onclick="triggerFileSelect()">
+        <?php if($logoImage && imageExists($logoImage)): ?>
+        <img src="<?php echo getImageUrl($logoImage); ?>?t=<?php echo time(); ?>" id="logoPreview">
+        <?php else: ?>
+        <img src="<?php echo $defaultIcon; ?>" id="logoPreview">
+        <?php endif; ?>
+        <div class="edit-overlay">📷</div>
+    </div>
 
         <form method="POST" enctype="multipart/form-data" id="uploadForm">
             <input type="file" name="logo_image" id="logoInput" class="logo-file-input" onchange="previewAndSubmit()">
@@ -259,6 +261,21 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif
     <!-- カレンダー管理 -->
     <div class="calendar-management">
         <a href="teacher_calendar.php" class="calendar-link">カレンダーを管理する →</a>
+    </div>
+
+    <!-- 換算値設定ボタン（生年月日の下） -->
+    <div class="detail-row">
+        <span class="detail-label">換算値</span>
+        <div class="detail-value">
+            <button type="button" class="kansanti-btn" onclick="goToKansanti()">
+                生徒の換算値を設定する
+            </button>
+        </div>
+    </div>
+
+    <!-- ログアウト -->
+    <div class="logout-section">
+        <input type="button" class="logout-btn" onclick="location.href='logout.php'" value="ログアウト">
     </div>
 
     <!-- ボトムナビ -->
@@ -343,6 +360,13 @@ document.getElementById('usernameForm').addEventListener('submit', function(e) {
         return false;
     }
 });
+
+// 換算値設定画面へ遷移
+function goToKansanti() {
+    // 今は固定でkansanti.phpに遷移
+    // 生徒ごとのIDを渡したい場合は、ここに ?student_id=◯ を付けるイメージ
+    window.location.href = 'kansanti.php';
+}
 </script>
 </body>
 </html>

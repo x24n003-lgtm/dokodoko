@@ -3,7 +3,7 @@
     padding: 0;
     box-sizing: border-box;
 }
- 
+
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     background-color: #f0f0f0;
@@ -13,7 +13,7 @@ body {
     min-height: 100vh;
     padding: 20px;
 }
- 
+
 .container {
     width: 100%;
     max-width: 430px;
@@ -26,7 +26,7 @@ body {
     height: 90vh;
     max-height: 900px;
 }
- 
+
 /* ヘッダー（ステータスバー） */
 .header {
     background: white;
@@ -37,36 +37,36 @@ body {
     font-size: 14px;
     font-weight: 500;
 }
- 
+
 .time {
     font-size: 15px;
     font-weight: 600;
     color: #000000;
 }
- 
+
 .status-icons {
     display: flex;
     gap: 3px;
 }
- 
+
 /* タイトル */
 .title {
     padding: 15px 20px 10px;
     background-color: white;
 }
- 
+
 .title h1 {
     font-size: 34px;
     font-weight: 700;
     color: #000000;
 }
- 
+
 /* 検索バー */
 .search-bar {
     padding: 10px 20px 15px;
     background: white;
 }
- 
+
 .search-bar input {
     width: 100%;
     padding: 10px 15px;
@@ -76,15 +76,15 @@ body {
     background-color: #f5f5f5;
     outline: none;
 }
- 
+
 .search-bar input::placeholder {
     color: #999;
 }
- 
+
 .search-icon {
     display: none;
 }
- 
+
 /* チャットセクション */
 .chat-section {
     flex: 1;
@@ -92,20 +92,20 @@ body {
     background: white;
     padding: 0 20px 20px;
 }
- 
+
 .chat-section h2 {
     font-size: 22px;
     font-weight: 700;
     color: #000000;
     margin-bottom: 12px;
 }
- 
+
 /* チャットリスト */
 .chat-list {
     display: flex;
     flex-direction: column;
 }
- 
+
 .chat-item {
     display: flex;
     align-items: center;
@@ -114,11 +114,11 @@ body {
     cursor: pointer;
     gap: 12px;
 }
- 
+
 .chat-item:last-child {
     border-bottom: none;
 }
- 
+
 /* アバター */
 .avatar {
     width: 50px;
@@ -131,20 +131,20 @@ body {
     font-size: 22px;
     flex-shrink: 0;
 }
- 
+
 /* チャット情報 */
 .chat-info {
     flex: 1;
     min-width: 0;
 }
- 
+
 .chat-name {
     font-size: 16px;
     font-weight: 600;
     color: #333;
     margin-bottom: 3px;
 }
- 
+
 .chat-message {
     font-size: 13px;
     color: #999;
@@ -152,7 +152,7 @@ body {
     overflow: hidden;
     text-overflow: ellipsis;
 }
- 
+
 /* ボトムナビゲーション */
 .bottom-nav {
     display: flex;
@@ -162,7 +162,7 @@ body {
     background: white;
     border-top: 1px solid #e0e0e0;
 }
- 
+
 .nav-item {
     flex: 1;
     display: flex;
@@ -174,11 +174,11 @@ body {
     padding: 8px;
     cursor: pointer;
 }
- 
+
 .nav-item.active {
     color: #007AFF;
 }
- 
+
 .nav-icon {
     width: 24px;
     height: 24px;
@@ -187,41 +187,41 @@ body {
     background-repeat: no-repeat;
     background-position: center;
 }
- 
+
 .nav-icon.person {
     background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%23666" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>');
 }
- 
+
 .nav-item.active .nav-icon.person {
     background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%23007AFF" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>');
 }
- 
+
 .nav-icon.message {
     background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%23666" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>');
 }
- 
+
 .nav-item.active .nav-icon.message {
     background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%23007AFF" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>');
 }
- 
+
 .nav-icon.settings {
     background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%23666" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1 1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>');
 }
- 
+
 .nav-item.active .nav-icon.settings {
     background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%23007AFF" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1 1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>');
 }
- 
+
 .nav-text {
     font-size: 11px;
 }
- 
+
 /* ===== 日付区切り ===== */
 .date-divider {
     text-align: center;
     margin: 20px 0;
 }
- 
+
 .date-text {
     background-color: rgba(0, 0, 0, 0.1);
     color: #666;
@@ -230,7 +230,7 @@ body {
     font-size: 12px;
     display: inline-block;
 }
- 
+
 /* ===== メッセージがない場合のスタイル ===== */
 .no-messages {
     display: flex;
@@ -238,20 +238,20 @@ body {
     justify-content: center;
     height: 300px;
 }
- 
+
 .no-messages p {
     text-align: center;
     color: #666;
     font-size: 16px;
     line-height: 1.5;
 }
- 
+
 /* ===== レスポンシブ対応 ===== */
 @media (max-width: 430px) {
     body {
         padding: 0;
     }
-   
+    
     .container {
         border-radius: 0;
         height: 100vh;

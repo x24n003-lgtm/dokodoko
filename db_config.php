@@ -1,9 +1,9 @@
 <?php
 // データベース接続設定
 define('DB_HOST', '172.16.199.21');
-define('DB_NAME', 'dokodoko'); // データベース名を設定
-define('DB_USER', 'x24n007');      // ユーザー名を設定
-define('DB_PASS', 'n051211');      // パスワードを設定
+define('DB_NAME', 'dokodoko');
+define('DB_USER', 'x24n007');
+define('DB_PASS', 'n051211');
 
 // データベース接続
 function getDbConnection() {

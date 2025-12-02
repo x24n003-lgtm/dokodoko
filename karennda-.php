@@ -14,6 +14,81 @@ date_default_timezone_set('Asia/Tokyo');
 // ------------------ DB 接続 ------------------
 $pdo = getDbConnection();
 
+// ------------------ ログイン中ユーザーのID取得 ------------------
+try {
+    $stmt = $pdo->prepare("SELECT id FROM users WHERE email = ?");
+    $stmt->execute([$userEmail]);
+    $userRow = $stmt->fetch(PDO::FETCH_ASSOC);
+    if ($userRow) {
+        $studentId = (int)$userRow['id'];
+    } else {
+        session_destroy();
+        header('Location: login.php');
+        exit();
+    }
+} catch (PDOException $e) {
+    error_log("ユーザー取得エラー: " . $e->getMessage());
+    session_destroy();
+    header('Location: login.php');
+    exit();
+}
+
+// ------------------ 生徒の換算値合計取得 ------------------
+$totalValueRaw = 0.00;
+
+try {
+    $stmt = $pdo->prepare("
+        SELECT COALESCE(SUM(value), 0) AS total_value
+        FROM kansanti
+        WHERE student_id = :student_id
+    ");
+    $stmt->execute([':student_id' => $studentId]);
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+    if ($row) {
+        $totalValueRaw = (float)$row['total_value'];
+    }
+} catch (PDOException $e) {
+    error_log("換算値合計取得エラー: " . $e->getMessage());
+}
+
+// 小数第三位を切り捨てて表示用2桁に合わせる
+$totalValue = floor($totalValueRaw * 100) / 100;
+
+// ------------------ 警告メッセージ判定 ------------------
+$warningMessage = '';
+$warningLevel   = '';
+
+// 55 以上は常に退学メッセージ
+if ($totalValue >= 55) {
+    $warningMessage = '【退学】あなたは退学です。詳しくは学校からの正式な通知・説明を確認してください。';
+    $warningLevel   = 'level-5';
+
+// 54.00〜<55.00
+} elseif ($totalValue >= 54 && $totalValue < 55) {
+    $warningMessage = '【最重要】あと 1.00 で「おめでとう退学」のラインです。至急、担任または学校に相談してください。';
+    $warningLevel   = 'level-5';
+
+// 49.00〜<50.00
+} elseif ($totalValue >= 49 && $totalValue < 50) {
+    $warningMessage = '【警告】あと 1.00 で「退学勧告面談（校長）」のラインです。これ以上増やさないように行動を改めましょう。';
+    $warningLevel   = 'level-4';
+
+// 39.00〜<40.00
+} elseif ($totalValue >= 39 && $totalValue < 40) {
+    $warningMessage = '【注意】あと 1.00 で「保護者同伴三者面談」のラインです。授業・出席状況を見直しましょう。';
+    $warningLevel   = 'level-3';
+
+// 24.00〜<25.00
+} elseif ($totalValue >= 24 && $totalValue < 25) {
+    $warningMessage = '【注意】あと 1.00 で「幹部面談」のラインです。このままだと面談対象になります。';
+    $warningLevel   = 'level-2';
+
+// 9.00〜<10.00
+} elseif ($totalValue >= 9 && $totalValue < 10) {
+    $warningMessage = '【注意】あと 1.00 で「保護者あての手紙」が送付されるラインです。遅刻・欠席に気をつけましょう。';
+    $warningLevel   = 'level-1';
+}
+
 // ------------------ プロフィール画像取得 (修正) ------------------
 $stmt = $pdo->prepare("SELECT logo_image FROM users WHERE email = ?");
 $stmt->execute([$userEmail]);
@@ -87,6 +162,19 @@ $lastDay  = new DateTime($firstDay->format("Y-m-t"));
     object-fit: cover;
     display: block;
 }
+
+.warning-box {
+    margin: 10px 0 15px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    line-height: 1.5;
+}
+.warning-box.level-1 { background:#fff3cd; color:#856404; }
+.warning-box.level-2 { background:#ffeeba; color:#856404; }
+.warning-box.level-3 { background:#f8d7da; color:#721c24; }
+.warning-box.level-4 { background:#f5c6cb; color:#721c24; }
+.warning-box.level-5 { background:#f1b0b7; color:#721c24; font-weight:bold; }
 </style>
 </head>
 <body>
@@ -105,10 +193,20 @@ $lastDay  = new DateTime($firstDay->format("Y-m-t"));
     </div>
 
     <div class="content">
+        <!-- 換算値表示 -->
         <div class="conversion-value">
             <div class="conversion-label">換算値</div>
-            <div class="conversion-number">5.66</div>
+            <div class="conversion-number">
+                <?php echo number_format($totalValue, 2); ?>
+            </div>
         </div>
+
+        <!-- 警告メッセージ -->
+        <?php if (!empty($warningMessage)): ?>
+            <div class="warning-box <?php echo htmlspecialchars($warningLevel, ENT_QUOTES, 'UTF-8'); ?>">
+                <?php echo htmlspecialchars($warningMessage, ENT_QUOTES, 'UTF-8'); ?>
+            </div>
+        <?php endif; ?>
 
         <div class="calendar-nav">
             <a href="?year=<?= $prevYear ?>&month=<?= $prevMonth ?>" class="nav-btn">←</a>

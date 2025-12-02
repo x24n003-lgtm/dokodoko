@@ -7,7 +7,10 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'teacher') {
     exit();
 }
 
-// データベース接続
+// ------------------ 基本設定 ------------------
+date_default_timezone_set('Asia/Tokyo');
+
+// ------------------ データベース接続 ------------------
 $host = "172.16.199.21";
 $user = "x24n007";
 $pass = "n051211";
@@ -15,23 +18,25 @@ $db   = "dokodoko";
 $port = 3306;
 
 try {
-    $pdo = new PDO("mysql:host=$host;port=$port;dbname=$db;charset=utf8mb4", $user, $pass, [
+    $dsn = "mysql:host=$host;port=$port;dbname=$db;charset=utf8mb4";
+    $options = [
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-    ]);
+    ];
+    $pdo = new PDO($dsn, $user, $pass, $options);
 } catch (PDOException $e) {
-    die("DB接続エラー: " . $e->getMessage());
+    die("データベース接続エラー: " . $e->getMessage());
 }
 
-// 教員のプロフィール画像取得
-$logo_stmt = $pdo->prepare("SELECT username, logo_image FROM users WHERE id=:teacher_id AND user_type='teacher'");
-$logo_stmt->execute([':teacher_id' => $_SESSION['user_id']]);
-$teacher_data = $logo_stmt->fetch();
-$teacher_name = $teacher_data['username'] ?? '今どこ';
-$logo_image = $teacher_data['logo_image'] ?? null;
-
-// デフォルトアイコン
+// ------------------ 教員のプロフィール画像取得 ------------------
 $default_icon = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="%23e0e0e0"/><circle cx="50" cy="35" r="20" fill="%23999"/><path d="M20 80 Q20 60 50 60 Q80 60 80 80 Z" fill="%23999"/></svg>';
+
+$logo_sql = "SELECT logo_image FROM users WHERE id = :teacher_id AND user_type = 'teacher'";
+$logo_stmt = $pdo->prepare($logo_sql);
+$logo_stmt->bindParam(':teacher_id', $_SESSION['user_id'], PDO::PARAM_INT);
+$logo_stmt->execute();
+$teacher_data = $logo_stmt->fetch();
+$logo_image = $teacher_data['logo_image'] ?? null;
 
 // 教員のプロフィール画像を決定
 if ($logo_image && file_exists($logo_image)) {
@@ -40,103 +45,142 @@ if ($logo_image && file_exists($logo_image)) {
     $display_image = $default_icon;
 }
 
-// クラス選択
-$selected_class = $_GET['class'] ?? 'all';
-$classes = $pdo->query("SELECT DISTINCT class_name FROM users WHERE user_type='student' AND class_name IS NOT NULL ORDER BY class_name")->fetchAll(PDO::FETCH_COLUMN);
+// ------------------ クラス選択の処理 ------------------
+$selected_class = isset($_GET['class']) ? $_GET['class'] : 'all';
 
-// 学生データ取得（logo_imageも取得）
+$class_sql = "SELECT DISTINCT class_name FROM users WHERE user_type = 'student' AND class_name IS NOT NULL ORDER BY class_name";
+$class_stmt = $pdo->query($class_sql);
+$classes = $class_stmt->fetchAll(PDO::FETCH_COLUMN);
+
+// ------------------ 学生データの取得（プロフィール画像を含む） ------------------
 if ($selected_class === 'all') {
-    $stmt = $pdo->prepare("
-        SELECT id, username as name, class_name, logo_image, lat, lng, home_lat, home_lng
-        FROM users
-        WHERE user_type='student'
-        ORDER BY class_name, id
-    ");
+    $sql = "SELECT 
+                u.id,
+                u.username as name,
+                u.class_name,
+                u.logo_image,
+                u.lat,
+                u.lng,
+                u.location_updated_at,
+                a.status,
+                a.status_detail,
+                a.location,
+                a.attendance_time
+            FROM users u
+            LEFT JOIN (
+                SELECT user_id, status, status_detail, location, attendance_time
+                FROM attendance 
+                WHERE DATE(attendance_date) = CURDATE()
+                GROUP BY user_id
+            ) a ON u.id = a.user_id
+            WHERE u.user_type = 'student'
+            ORDER BY u.class_name, u.id";
+    
+    $stmt = $pdo->prepare($sql);
     $stmt->execute();
 } else {
-    $stmt = $pdo->prepare("
-        SELECT id, username as name, class_name, logo_image, lat, lng, home_lat, home_lng
-        FROM users
-        WHERE user_type='student' AND class_name=:class_name
-        ORDER BY id
-    ");
-    $stmt->execute([':class_name' => $selected_class]);
+    $sql = "SELECT 
+                u.id,
+                u.username as name,
+                u.class_name,
+                u.logo_image,
+                u.lat,
+                u.lng,
+                u.location_updated_at,
+                a.status,
+                a.status_detail,
+                a.location,
+                a.attendance_time
+            FROM users u
+            LEFT JOIN (
+                SELECT user_id, status, status_detail, location, attendance_time
+                FROM attendance 
+                WHERE DATE(attendance_date) = CURDATE()
+                GROUP BY user_id
+            ) a ON u.id = a.user_id
+            WHERE u.user_type = 'student' AND u.class_name = :class_name
+            ORDER BY u.id";
+    
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':class_name', $selected_class, PDO::PARAM_STR);
+    $stmt->execute();
 }
+
 $students = $stmt->fetchAll();
 
-// 学校の位置
+// 学校の位置（船橋情報ビジネス専門学校）
 $school_lat = 35.704517;
 $school_lng = 139.984413;
-$school_radius = 500; // 校内判定[m]
+$school_radius = 100;
 
 // 距離計算関数
 function calculateDistance($lat1, $lng1, $lat2, $lng2) {
     $earth_radius = 6371000;
+    
     $dLat = deg2rad($lat2 - $lat1);
     $dLng = deg2rad($lng2 - $lng1);
-    $a = sin($dLat/2)**2 + cos(deg2rad($lat1)) * cos(deg2rad($lat2)) * sin($dLng/2)**2;
-    $c = 2 * atan2(sqrt($a), sqrt(1-$a));
-    return $earth_radius * $c;
+    
+    $a = sin($dLat / 2) ** 2 +
+         cos(deg2rad($lat1)) * cos(deg2rad($lat2)) *
+         sin($dLng / 2) ** 2;
+    
+    $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
+    $distance = $earth_radius * $c;
+    
+    return $distance;
 }
 
-// 位置情報のテキスト変換関数
+// 位置情報による自動判定
+$processed_students = [];
+foreach ($students as $student) {
+    if ($student['lat'] && $student['lng']) {
+        $distance = calculateDistance(
+            $school_lat, 
+            $school_lng, 
+            $student['lat'], 
+            $student['lng']
+        );
+        
+        if ($distance <= $school_radius) {
+            $student['real_location'] = 'school';
+            $student['distance'] = $distance;
+        } else if ($distance <= 3000) {
+            $student['real_location'] = 'other';
+            $student['distance'] = $distance;
+        } else {
+            $student['real_location'] = 'home';
+            $student['distance'] = $distance;
+        }
+    } else {
+        $student['real_location'] = 'unknown';
+        $student['distance'] = null;
+    }
+    
+    $processed_students[] = $student;
+}
+$students = $processed_students;
+
+function getLocationColor($real_location) {
+    switch($real_location) {
+        case 'school': return 'green';
+        case 'home': return 'red';
+        case 'other': return 'yellow';
+        default: return 'gray';
+    }
+}
+
 function getLocationText($real_location, $distance = null) {
     switch($real_location) {
-        case 'school':
-            return '学校';
-        case 'home':
-            return '自宅';
+        case 'school': return '学校';
+        case 'home': return '自宅';
         case 'other':
-            if ($distance !== null) {
+            if ($distance) {
                 return '移動中 (' . round($distance) . 'm)';
             }
             return '移動中';
-        default:
-            return '位置不明';
+        default: return '位置不明';
     }
 }
-
-// 色判定関数
-function getLocationColor($loc) {
-    return match($loc) {
-        'school' => 'green',
-        'home' => 'red',
-        'other' => 'yellow',
-        default => 'gray',
-    };
-}
-
-// 学生データの距離判定
-$epsilon = 0.00001;
-
-foreach ($students as &$s) {
-    $lat = $s['lat'] ?? null;
-    $lng = $s['lng'] ?? null;
-    $home_lat = $s['home_lat'] ?? null;
-    $home_lng = $s['home_lng'] ?? null;
-
-    if ($lat !== null && $lng !== null) {
-        $distance_to_school = calculateDistance($school_lat, $school_lng, $lat, $lng);
-
-        if ($distance_to_school <= $school_radius) {
-            $s['real_location'] = 'school';
-        } elseif ($home_lat !== null && $home_lng !== null &&
-                  abs($lat - $home_lat) < $epsilon && abs($lng - $home_lng) < $epsilon) {
-            $s['real_location'] = 'home';
-        } else {
-            $s['real_location'] = 'other';
-        }
-
-        $s['distance'] = $distance_to_school;
-    } else {
-        $s['real_location'] = 'unknown';
-        $s['distance'] = null;
-    }
-
-    $s['display_status'] = getLocationText($s['real_location'], $s['distance']);
-}
-unset($s);
-
 ?>
 <!DOCTYPE html>
 <html lang="ja">
@@ -145,9 +189,48 @@ unset($s);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>出席管理</title>
     <link rel="stylesheet" href="syusseki.css">
+    <style>
+        /* プロフィール画像用のスタイル追加 */
+        .header-profile-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #ddd;
+        }
+        
+        .student-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            overflow: hidden;
+            flex-shrink: 0;
+            background: #e0e0e0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .student-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .avatar-circle {
+            width: 100%;
+            height: 100%;
+            background: #9b9b9b;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+        }
+    </style>
 </head>
 <body>
-
 
 <div class="phone-container">
     <!-- ステータスバー -->
@@ -194,16 +277,14 @@ unset($s);
     <!-- 生徒リスト -->
     <div class="content">
         <div class="student-list" id="studentList">
-            <?php foreach ($students as $student):
+            <?php foreach ($students as $student): 
                 // 学生のプロフィール画像を設定
                 $student_image = $student['logo_image'] ?? '';
                 if (empty($student_image) || !file_exists($student_image)) {
                     $student_image = null;
                 }
             ?>
-               <div class="student-item"
-                    data-id="<?php echo $student['id']; ?>"
-                    data-name="<?php echo htmlspecialchars($student['name']); ?>">
+                <div class="student-item" data-name="<?php echo htmlspecialchars($student['name']); ?>">
                     <div class="student-avatar">
                         <?php if ($student_image): ?>
                             <img src="<?php echo htmlspecialchars($student_image); ?>?t=<?php echo time(); ?>" 
@@ -255,77 +336,77 @@ unset($s);
 
     <!-- ボトムナビゲーション -->
     <div class="bottom-nav">
-        <button class="nav-item active">
-            <div class="nav-icon">
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                    <circle cx="12" cy="7" r="4"></circle>
-                </svg>
-            </div>
-            <span class="nav-text">出席</span>
-        </button>
-        <a href="teachatp.php" class="nav-item">
-            <div class="nav-icon">
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-                </svg>
-            </div>
-            <span class="nav-text">チャット</span>
-        </a>
-        <button class="nav-item" onclick="location.href='teachermypage.php'">
-            <div class="nav-icon">
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                    <circle cx="12" cy="12" r="3"></circle>
-                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-                </svg>
-            </div>
-            <span class="nav-text">マイページ</span>
-        </button>
-    </div>
+            <!-- 左：出席管理 -->
+            <a href="syusseki.php" class="nav-item active">
+                <div class="nav-icon person"></div>
+                <span class="nav-text">出席</span>
+            </a>
+
+            <!-- 中：チャット -->
+            <a href="teachatp.php" class="nav-item">
+                <div class="nav-icon message"></div>
+                <span class="nav-text">チャット</span>
+            </a>
+
+            <!-- 右：マイページ -->
+            <a href="teachermypage.php" class="nav-item">
+                <div class="nav-icon settings"></div>
+                <span class="nav-text">マイページ</span>
+            </a>
+        </div>
 </div>
 
-<!-- Google Maps API を読み込む -->
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA2-Yo-Z_8bTG8KKCSf7fOTlH026W5wDwg"></script>
-
 <script>
-// 学校座標
-const SCHOOL_LAT = 35.704517;
-const SCHOOL_LNG = 139.984413;
+// =====================================================
+//      Google API のルート計算サービス
+// =====================================================
+let directionsService = new google.maps.DirectionsService();
 
-// 生徒位置情報
-const studentPositions = <?php echo json_encode(
-    array_map(function($s){
-        return [
-            "id" => $s["id"],
-            "lat" => $s["lat"],
-            "lng" => $s["lng"],
-        ];
-    }, $students)
-); ?>;
+// PHP → JS に渡された学生データ
+const studentPositions = <?= json_encode($students) ?>;
 
-// DirectionsService を作成
-const directionsService = new google.maps.DirectionsService();
+// 学校の位置
+const SCHOOL_LAT = <?= $school_lat ?>;
+const SCHOOL_LNG = <?= $school_lng ?>;
 
-// 秒→分・時間・日変換
+// =====================================================
+//      時間フォーマット
+// =====================================================
 function formatDuration(sec) {
-    let minutes = Math.ceil(sec / 60);
-    const days = Math.floor(minutes / (60*24));
-    minutes -= days*60*24;
-    const hours = Math.floor(minutes / 60);
-    minutes = minutes % 60;
-
-    let str = "";
-    if(days>0) str += `${days}日 `;
-    if(hours>0) str += `${hours}時間 `;
-    str += `${minutes}分`;
-    return str;
+    const min = Math.round(sec / 60);
+    return `${min}分`;
 }
 
-// 徒歩時間計算
+// =====================================================
+//      到着時間計算（学校判定を最優先）
+// =====================================================
 function calcTravelTimes() {
+
     studentPositions.forEach(stu => {
         if (!stu.lat || !stu.lng) return;
 
+        const item = document.querySelector(`.student-item[data-id="${stu.id}"]`);
+        if (!item) return;
+
+        // ★ arrival-time の場所を先に確保
+        let box = item.querySelector(".arrival-time");
+        if (!box) {
+            box = document.createElement("div");
+            box.className = "arrival-time";
+            item.querySelector(".student-info").appendChild(box);
+        }
+
+        // ---------------------------------------------------
+        // ★ PHP が school 判定 → 最優先で到着扱い
+        // ---------------------------------------------------
+        if (stu.real_location === "school") {
+            box.innerHTML = "到着完了"; // 学校判定で即到着
+            return;
+        }
+
+        // ---------------------------------------------------
+        // ★ Google API（歩き）で到着時間計算（学校以外の生徒）
+        // ---------------------------------------------------
         directionsService.route(
             {
                 origin: { lat: parseFloat(stu.lat), lng: parseFloat(stu.lng) },
@@ -333,26 +414,24 @@ function calcTravelTimes() {
                 travelMode: google.maps.TravelMode.WALKING,
             },
             (result, status) => {
-                const item = document.querySelector(`.student-item[data-id="${stu.id}"]`);
-                if(!item) return;
-
-                let box = item.querySelector(".arrival-time");
-                if (!box) {
-                    box = document.createElement("div");
-                    box.className = "arrival-time";
-                    item.querySelector(".student-info").appendChild(box);
-                }
 
                 if (status === 'OK') {
                     const durationSec = result.routes[0].legs[0].duration.value;
-                    box.innerHTML = `学校まで ${formatDuration(durationSec)}`;
-                } else {
-                    // APIがルートを返さない場合や遠すぎる場合
-                    const distance = item.querySelector(".status-time")?.innerText.replace('m','') || null;
-                    if(distance && parseInt(distance) > 100000) { // 100km以上は遠すぎと表示
-                        box.innerHTML = '遠すぎて計算不能';
+                    const min = Math.round(durationSec / 60);
+
+                    // ★ Google API で 1 分以下なら到着完了
+                    if (min <= 1) {
+                        box.innerHTML = "到着完了";
                     } else {
-                        box.innerHTML = '計算失敗';
+                        box.innerHTML = `学校まで ${min}分`;
+                    }
+
+                } else {
+                    // 遠すぎてルートが作れない
+                    if (stu.distance && stu.distance > 100000) {
+                        box.innerHTML = "遠すぎて計算不能";
+                    } else {
+                        box.innerHTML = "計算失敗";
                     }
                 }
             }

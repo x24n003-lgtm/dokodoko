@@ -40,10 +40,19 @@ unset($_SESSION['profile_message_type']);
 </head>
 <body>
 
+<!-- ステータスバー -->
+<div class="status-bar">
+    <span><?php echo date('G:i'); ?></span>
+     <div class="status-icons">
+        <span>📶</span>
+        <span>📡</span>
+        <span>🔋</span>
+    </div>
+</div>
+
 <div class="container">
 
     <header class="header">
-        <a href="karennda-.php" class="back-btn">← 戻る</a>
         <h1 class="header-title">マイページ</h1>
     </header>
 
@@ -72,6 +81,8 @@ unset($_SESSION['profile_message_type']);
                 <button type="button" class="edit-btn" onclick="toggleEdit()">編集</button>
                 <button type="submit" id="saveBtn" class="save-btn" style="display:none;">保存</button>
             </div>
+
+             
 
             <!-- プロフィール詳細 -->
             <div class="profile-details">
