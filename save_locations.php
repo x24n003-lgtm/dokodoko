@@ -1,15 +1,13 @@
 <?php
 // ===============================
-// save_locations.php (セッション対応版)
+// save_locations.php (整理版)
 // ===============================
 
 // エラー表示（開発用）
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
-// ===============================
-// セッション読み込み（サイト全体共通）
-// ===============================
+// セッション設定
 session_set_cookie_params([
     'path' => '/',
     'httponly' => true,
@@ -17,36 +15,26 @@ session_set_cookie_params([
 ]);
 session_start();
 
-// ===============================
 // ヘッダー設定
-// ===============================
 header("Content-Type: application/json; charset=UTF-8");
 
-// ===============================
 // JSON データ受信
-// ===============================
 $input = file_get_contents("php://input");
 $data = json_decode($input, true);
 
-// ===============================
 // email 判定（セッション優先 → JSON POST）
-// ===============================
 $email = $_SESSION['email'] ?? ($data['email'] ?? null);
 if (!$email) {
     echo json_encode(["error" => "不正なデータ（email が必要）"], JSON_UNESCAPED_UNICODE);
     exit;
 }
 
-// ===============================
 // 緯度・経度・住所取得
-// ===============================
 $lat = $data['lat'] ?? null;
 $lng = $data['lng'] ?? null;
 $home_address = $data['home_address'] ?? null;
 
-// ===============================
 // DB接続
-// ===============================
 $host = "172.16.199.21";
 $user = "x24n007";
 $pass = "n051211";
@@ -59,17 +47,13 @@ if ($conn->connect_error) {
     exit;
 }
 
-// ===============================
 // 既存ユーザーのチェック
-// ===============================
 $stmt = $conn->prepare("SELECT id FROM users WHERE email = ?");
 $stmt->bind_param("s", $email);
 $stmt->execute();
 $result = $stmt->get_result();
 
-// ===============================
 // 更新 or 挿入
-// ===============================
 if ($result->num_rows > 0) {
     // 更新
     if ($lat !== null && $lng !== null) {
@@ -123,55 +107,7 @@ if ($result->num_rows > 0) {
         "email" => $email,
         "lat" => $lat,
         "lng" => $lng
-    ], JSON_UNESCAPED_UNICODE);<?php
-    ini_set('display_errors', 1);
-    error_reporting(E_ALL);
-    
-    session_start();
-    
-    header("Content-Type: application/json");
-    
-    if (!isset($_POST['email']) || !isset($_POST['lat']) || !isset($_POST['lng'])) {
-        echo json_encode(["error" => "必要なデータが不足しています"]);
-        exit;
-    }
-    
-    $email = $_POST['email'];
-    $lat = $_POST['lat'];
-    $lng = $_POST['lng'];
-    
-    $conn = new mysqli("172.16.199.21", "x24n007", "n051211", "dokodoko");
-    $conn->set_charset("utf8mb4");
-    
-    if ($conn->connect_error) {
-        echo json_encode(["error" => "DB接続失敗"]);
-        exit;
-    }
-    
-    // lat/lng（現在位置）だけ更新
-    $stmt = $conn->prepare("
-        UPDATE users 
-        SET lat = ?, lng = ?, location_updated_at = NOW()
-        WHERE email = ?
-    ");
-    
-    $stmt->bind_param("dds", $lat, $lng, $email);
-    
-    if ($stmt->execute()) {
-        echo json_encode([
-            "success" => "位置情報を更新しました",
-            "email" => $email,
-            "lat" => $lat,
-            "lng" => $lng
-        ]);
-    } else {
-        echo json_encode([
-            "error" => "更新失敗: " . $stmt->error
-        ]);
-    }
-    
-    ?>
-    
+    ], JSON_UNESCAPED_UNICODE);
 }
 
 $stmt->close();

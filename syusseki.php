@@ -306,9 +306,19 @@ const studentPositions = <?php echo json_encode(
 // DirectionsService を作成
 const directionsService = new google.maps.DirectionsService();
 
-// 秒→分
-function secToMin(sec) {
-    return Math.ceil(sec / 60);
+// 秒→分・時間・日変換
+function formatDuration(sec) {
+    let minutes = Math.ceil(sec / 60);
+    const days = Math.floor(minutes / (60*24));
+    minutes -= days*60*24;
+    const hours = Math.floor(minutes / 60);
+    minutes = minutes % 60;
+
+    let str = "";
+    if(days>0) str += `${days}日 `;
+    if(hours>0) str += `${hours}時間 `;
+    str += `${minutes}分`;
+    return str;
 }
 
 // 徒歩時間計算
@@ -323,19 +333,26 @@ function calcTravelTimes() {
                 travelMode: google.maps.TravelMode.WALKING,
             },
             (result, status) => {
+                const item = document.querySelector(`.student-item[data-id="${stu.id}"]`);
+                if(!item) return;
+
+                let box = item.querySelector(".arrival-time");
+                if (!box) {
+                    box = document.createElement("div");
+                    box.className = "arrival-time";
+                    item.querySelector(".student-info").appendChild(box);
+                }
+
                 if (status === 'OK') {
                     const durationSec = result.routes[0].legs[0].duration.value;
-                    const min = secToMin(durationSec);
-
-                    const item = document.querySelector(`.student-item[data-id="${stu.id}"]`);
-                    if (item) {
-                        let box = item.querySelector(".arrival-time");
-                        if (!box) {
-                            box = document.createElement("div");
-                            box.className = "arrival-time";
-                            item.querySelector(".student-info").appendChild(box);
-                        }
-                        box.innerHTML = `学校まで ${min}分`;
+                    box.innerHTML = `学校まで ${formatDuration(durationSec)}`;
+                } else {
+                    // APIがルートを返さない場合や遠すぎる場合
+                    const distance = item.querySelector(".status-time")?.innerText.replace('m','') || null;
+                    if(distance && parseInt(distance) > 100000) { // 100km以上は遠すぎと表示
+                        box.innerHTML = '遠すぎて計算不能';
+                    } else {
+                        box.innerHTML = '計算失敗';
                     }
                 }
             }
@@ -345,6 +362,7 @@ function calcTravelTimes() {
 
 calcTravelTimes();
 </script>
+
 
 </body>
 </html>
