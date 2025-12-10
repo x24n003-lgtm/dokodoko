@@ -9,11 +9,12 @@ function isLinuxServer() {
 
 // ===== 1. アップロード基準ディレクトリ =====
 if (isLinuxServer()) {
-    define('UPLOAD_BASE_DIR', '/var/www/html/dokodoko/uploads/');
-    define('UPLOAD_BASE_URL', 'http://172.16.199.21/dokodoko/uploads/');
+    // ★★★ dokodoko4 に変更 ★★★
+    define('UPLOAD_BASE_DIR', '/var/www/html/dokodoko4/uploads/');
+    define('UPLOAD_BASE_URL', 'http://172.16.199.21/dokodoko4/uploads/');
 } else {
     define('UPLOAD_BASE_DIR', __DIR__ . '/uploads/');
-    define('UPLOAD_BASE_URL', 'http://localhost/dokodoko/uploads/');
+    define('UPLOAD_BASE_URL', 'http://localhost/dokodoko4/uploads/');
 }
 
 // ===== 2. ロゴ用 =====
@@ -32,17 +33,18 @@ function ensureUploadDirectory($dir) {
 function getImageUrl($fileName) {
     if (empty($fileName)) return 'default_icon.png';
 
-    // uploads/logos/xxxx.jpg のように相対パスで保存されている場合
-    if (strpos($fileName, 'uploads/') === 0) {
+    if (str_starts_with($fileName, 'logos/')) {
+        return UPLOAD_BASE_URL . $fileName;
+    }
+
+    if (str_starts_with($fileName, 'uploads/')) {
         return UPLOAD_BASE_URL . substr($fileName, strlen('uploads/'));
     }
 
-    // ただのファイル名だけの場合（logo_xxx.jpg）
     if (!str_contains($fileName, '/')) {
         return LOGO_URL . $fileName;
     }
 
-    // それ以外（安全のため）
     return $fileName;
 }
 
@@ -50,12 +52,13 @@ function getImageUrl($fileName) {
 function imageExists($fileName) {
     if (empty($fileName)) return false;
 
-    // uploads/logos/xxx.jpg の場合
     if (file_exists(UPLOAD_BASE_DIR . $fileName)) return true;
-
-    // logos/xxx.jpg の場合
-    if (file_exists(LOGO_DIR . basename($fileName))) return true;
 
     return false;
 }
+
+// ===== 6. 必ずディレクトリを作成 =====
+ensureUploadDirectory(UPLOAD_BASE_DIR);
+ensureUploadDirectory(LOGO_DIR);
+
 ?>

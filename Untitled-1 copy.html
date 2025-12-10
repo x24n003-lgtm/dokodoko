@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>デイリーリストカレンダー</title>
+
+</head>
+<body>
+
+<div class="calendar">
+  <div class="calendar-header">
+    <h2 id="monthYear">2025年9月</h2>
+  </div>
+  <div id="daysList">
+    <!-- 日付ごとの行がここに入る -->
+  </div>
+</div>
+
+<script>
+const daysList = document.getElementById("daysList");
+const monthYear = document.getElementById("monthYear");
+
+let today = new Date();
+let currentMonth = today.getMonth();
+let currentYear = today.getFullYear();
+
+const events = {
+  "2025-09-05": "テスト📚",
+  "2025-09-12": "体育祭🏃‍♂️",
+  "2025-09-20": "提出期限📝"
+};
+
+function renderList(year, month) {
+  daysList.innerHTML = "";
+  const lastDate = new Date(year, month + 1, 0).getDate();
+  const monthNames = ["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"];
+  monthYear.textContent = `${year}年${monthNames[month]}`;
+
+  for(let d=1; d<=lastDate; d++){
+    const row = document.createElement("div");
+    row.classList.add("day-row");
+
+    const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    
+    const dateDiv = document.createElement("div");
+    dateDiv.classList.add("date");
+    dateDiv.textContent = d + "日";
+
+    const eventsDiv = document.createElement("div");
+    eventsDiv.classList.add("events");
+    eventsDiv.textContent = events[dateStr] || "予定なし";
+
+    row.appendChild(dateDiv);
+    row.appendChild(eventsDiv);
+
+    if(year === today.getFullYear() && month === today.getMonth() && d === today.getDate()) {
+      row.classList.add("today");
+    }
+
+    daysList.appendChild(row);
+  }
+}
+
+renderList(currentYear, currentMonth);
+</script>
+
+</body>
+</html>

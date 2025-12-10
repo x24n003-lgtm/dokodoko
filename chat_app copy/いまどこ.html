@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>今どこ？</title>
+  <style>
+    #map {
+      height: 500px;
+      width: 100%;
+      border-radius: 15px;
+      box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+    }
+  </style>
+</head>
+<body>
+  <h1>今どこ機能（赤＝家、黄＝移動中、緑＝学校）</h1>
+  <div id="map"></div>
+
+  <script>
+    function initMap() {
+      const map = new google.maps.Map(document.getElementById("map"), {
+        zoom: 15,
+        center: { lat: 35.6812, lng: 139.7671 } // 東京駅付近
+      });
+
+      // PHPから取得するときは fetch("get_status.php") に置き換え
+      const data = { lat: 35.6812, lng: 139.7671, status: "home" }; 
+
+      let color = "";
+      if (data.status === "home") {
+        color = "red";   // 家
+      } else if (data.status === "moving") {
+        color = "yellow"; // 移動中
+      } else if (data.status === "school") {
+        color = "green"; // 学校
+      }
+
+      new google.maps.Marker({
+        position: { lat: parseFloat(data.lat), lng: parseFloat(data.lng) },
+        map,
+        icon: {
+          path: google.maps.SymbolPath.CIRCLE,
+          fillColor: color,
+          fillOpacity: 1,
+          strokeColor: "#333",
+          strokeWeight: 2,
+          scale: 12 // 丸の大きさ（数値を大きくすると拡大）
+        }
+      });
+    }
+  </script>
+
+  <!-- Google Maps API 読み込み -->
+  <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap" async defer></script>
+</body>
+</html>

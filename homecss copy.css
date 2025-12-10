@@ -1,0 +1,336 @@
+/* ------------------------------
+   ✨ 全体リセット（余白とボックスサイズ統一）
+------------------------------ */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+ 
+/* ------------------------------
+   ✨ body全体の基本設定（スマホ画面中央寄せ）
+------------------------------ */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: #f0f0f0; /* 背景を薄いグレー */
+    display: flex;
+    justify-content: center;   /* 横方向中央寄せ */
+    align-items: center;       /* 縦方向中央寄せ */
+    min-height: 100vh;         /* 画面全体の高さ確保 */
+    padding: 20px;
+}
+ 
+/* ------------------------------
+   ✨ スマホ枠デザイン（白いカード風の外枠）
+------------------------------ */
+.phone-container {
+    width: 100%;
+    max-width: 430px;              /* iPhone14 Pro Maxくらいの幅 */
+    background: white;
+    border-radius: 30px;           /* 角丸でスマホ風 */
+    box-shadow: 0 10px 50px rgba(0,0,0,0.2); /* 影で浮かせる */
+    overflow: hidden;              /* 内容のはみ出し防止 */
+    display: flex;
+    flex-direction: column;
+    height: 90vh;
+    max-height: 900px;
+}
+ 
+/* ------------------------------
+   ✨ ステータスバー（時計・電波表示の場所）
+------------------------------ */
+.status-bar {
+    background: white;
+    padding: 10px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+}
+ 
+/* ------------------------------
+   ✨ ヘッダー（タイトル & プロフィール）
+------------------------------ */
+.header {
+    background: white;
+    padding: 15px 20px;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #e0e0e0;
+}
+ 
+/* プロフィール画像の丸枠（仮アイコン）*/
+.profile-pic {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;  /* 真円にする */
+    background: #ddd;
+    margin-right: 10px;
+}
+ 
+/* ヘッダーのタイトル文字 */
+.header-title {
+    font-size: 18px;
+    font-weight: bold;
+}
+ 
+/* ------------------------------
+   ✨ メインスクリーン（中身のエリア）
+------------------------------ */
+.content {
+    flex: 1;                 /* 残りの高さ全部使う */
+    overflow-y: auto;        /* 中身が多いとき縦スクロール */
+    padding: 20px;
+    padding-bottom: 80px;    /* 下のナビバーと重ならないように余白 */
+}
+ 
+/* ------------------------------
+   ✨ 出席率などの数値カード
+------------------------------ */
+.conversion-value {
+    background: #f8f8f8;
+    padding: 15px;
+    border-radius: 10px;
+    text-align: center;
+    margin-bottom: 20px;
+}
+ 
+.conversion-label {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 5px;
+}
+ 
+.conversion-number {
+    font-size: 28px;
+    font-weight: bold;
+    color: #333;
+}
+ 
+/* ------------------------------
+   ✨ カレンダー月移動（← 今月 →）
+------------------------------ */
+.calendar-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding: 10px;
+    background: #f8f8f8;
+    border-radius: 8px;
+}
+ 
+/* 前月・次月のボタン */
+.nav-btn {
+    background: none;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    color: #007AFF;      /* iOSっぽい青 */
+    padding: 5px 10px;
+    text-decoration: none;
+}
+ 
+.current-month {
+    font-size: 16px;
+    font-weight: bold;
+}
+ 
+/* ------------------------------
+   ✨ カレンダー本体（表）
+------------------------------ */
+.calendar-table {
+    width: 100%;
+    border-collapse: separate;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    border-spacing: 0;
+}
+ 
+.calendar-table th {
+    background: #333;
+    color: white;
+    padding: 12px 8px;
+    font-size: 14px;
+}
+ 
+.calendar-table td {
+    padding: 12px 8px;
+    border-bottom: 1px solid #e0e0e0;
+    font-size: 14px;
+    vertical-align: top;
+    /* 追加：行全体の高さを揃える */
+    height: 70px; /* ← 好きな高さに調整可能 */
+}
+
+/* 日付列を狭くする */
+.calendar-table td:first-child {
+    width: 70px;   /* ← 好きな幅に調整可能（例：60px / 80px） */
+    white-space: nowrap;
+}
+
+/* 予定列を広くする */
+.calendar-table td:last-child {
+    width: auto;
+}
+
+ 
+/* 最終行だけ線を消す */
+.calendar-table tr:last-child td {
+    border-bottom: none;
+}
+ 
+/* 日曜：赤色 */
+.sunday {
+    color: #FF3B30;
+    font-weight: 600;
+}
+ 
+/* 土曜：青色 */
+.saturday {
+    color: #007AFF;
+    font-weight: 600;
+}
+
+
+ 
+/* ==================== イベント表示の強化（新規追加） ==================== */
+
+/* イベントがある日付の行全体を強調 */
+.calendar-table tr:has(.event-text:not(:empty)) {
+    background: #f9f9f9;
+}
+
+/* イベントテキストのスタイル */
+.event-text {
+    font-size: 13px;
+    color: #333;
+    line-height: 1.5;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+/* イベントがある場合の装飾 */
+.event-text:not(:empty) {
+    background: linear-gradient(90deg, #e8f5e9 0%, #f1f8f4 100%);
+    border-left: 3px solid #4CAF50;
+    font-weight: 500;
+    color: #2e7d32;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+/* イベントテキストにホバー効果 */
+.event-text:not(:empty):hover {
+    background: linear-gradient(90deg, #c8e6c9 0%, #e8f5e9 100%);
+    transform: translateX(2px);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+/* イベントがない日は少し控えめに */
+.event-text:empty {
+    color: #bbb;
+    font-size: 11px;
+}
+
+/* 今日の日付を強調表示 */
+.calendar-table tr.today {
+    background: #fff8e1;
+    border-left: 4px solid #FFC107;
+}
+
+.calendar-table tr.today td {
+    font-weight: 600;
+}
+
+/* イベントが長い場合の折り返し対応 */
+.event-text {
+    word-wrap: break-word;
+    word-break: break-word;
+    max-width: 100%;
+    display: block;
+}
+
+/* スマホで見やすいように調整 */
+@media (max-width: 430px) {
+    .calendar-table td {
+        padding: 10px 6px;
+        font-size: 13px;
+    }
+    
+    .event-text {
+        font-size: 12px;
+        padding: 3px 6px;
+    }
+}
+
+
+
+/* ==================== イベント表示強化ここまで ==================== */
+
+/* ------------------------------
+   ✨ 画面下の固定ナビゲーション（タブバー）
+------------------------------ */
+/* ボトムナビゲーション */
+.bottom-nav {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 10px 0 20px;
+    background: white;
+    border-top: 1px solid #e0e0e0;
+}
+
+.nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #666;
+    text-decoration: none;
+    padding: 8px;
+    cursor: pointer;
+}
+
+.nav-item.active {
+    color: #007AFF;
+}
+
+.nav-icon {
+    width: 24px;
+    height: 24px;
+    margin-bottom: 4px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+.nav-icon.person {
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%23666" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>');
+}
+
+.nav-item.active .nav-icon.person {
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%23007AFF" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>');
+}
+
+.nav-icon.message {
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%23666" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>');
+}
+
+.nav-item.active .nav-icon.message {
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%23007AFF" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>');
+}
+
+.nav-icon.settings {
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%23666" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1 1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>');
+}
+
+.nav-item.active .nav-icon.settings {
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%23007AFF" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1 1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>');
+}
+
+.nav-text {
+    font-size: 11px;
+}

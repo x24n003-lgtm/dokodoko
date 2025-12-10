@@ -1,0 +1,447 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: #f5f5f5;
+    min-height: 100vh;
+}
+
+.container {
+    max-width: 414px;
+    margin: 0 auto;
+    background-color: white;
+    min-height: 100vh;
+    position: relative;
+    padding-bottom: 100px;
+}
+
+/* ヘッダー */
+.header {
+    display: flex;
+    align-items: center;
+    padding: 16px;
+    background-color: white;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.back-btn {
+    font-size: 18px;
+    color: #007AFF;
+    text-decoration: none;
+    margin-right: 16px;
+}
+
+.header-title {
+    font-size: 17px;
+    font-weight: 600;
+    color: #000;
+}
+
+/* メッセージ表示 */
+.message {
+    padding: 12px 20px;
+    margin: 16px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.message-success {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.message-error {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+/* ==================== カレンダー管理セクション（新規追加） ==================== */
+.calendar-management {
+    background: #fff;
+    margin: 16px 20px;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    border: 1px solid #f0f0f0;
+    transition: all 0.3s ease;
+}
+
+.calendar-management:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    transform: translateY(-2px);
+}
+
+.calendar-management h3 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.calendar-management p {
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 16px;
+    line-height: 1.6;
+}
+
+.calendar-link {
+    display: inline-block;
+    background: #4CAF50;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(76, 175, 80, 0.2);
+}
+
+.calendar-link:hover {
+    background: #45a049;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+}
+
+.calendar-link:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(76, 175, 80, 0.2);
+}
+
+/* ロゴ画像設定セクション */
+.logo-section {
+    background: #fff;
+    margin: 16px 20px;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    border: 1px solid #f0f0f0;
+}
+
+.logo-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.logo-description {
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 16px;
+    line-height: 1.5;
+}
+
+.logo-preview {
+    width: 100px;
+    height: 100px;
+    border: 2px dashed #ddd;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 16px 0;
+    overflow: hidden;
+    background: #f9f9f9;
+    transition: all 0.3s ease;
+}
+
+.logo-preview:hover {
+    border-color: #007AFF;
+    background: #f0f7ff;
+}
+
+.logo-preview img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.logo-preview-empty {
+    color: #999;
+    font-size: 12px;
+    text-align: center;
+}
+
+.logo-upload-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.logo-file-input {
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+    background: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.logo-file-input:hover {
+    border-color: #007AFF;
+}
+
+.logo-btn {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.logo-upload-btn {
+    background: #007AFF;
+    color: white;
+}
+
+.logo-upload-btn:hover {
+    background: #0056b3;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,122,255,0.3);
+}
+
+.logo-upload-btn:active {
+    transform: translateY(0);
+}
+
+.logo-delete-btn {
+    background: #ff3b30;
+    color: white;
+}
+
+.logo-delete-btn:hover {
+    background: #d93025;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(255,59,48,0.3);
+}
+
+.logo-delete-btn:active {
+    transform: translateY(0);
+}
+
+/* プロフィール情報 */
+.profile-section {
+    padding: 30px 20px;
+    text-align: center;
+    position: relative;
+}
+
+.profile-image-container {
+    position: relative;
+    display: inline-block;
+    margin-bottom: 0px;
+}
+
+.profile-image {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background-color: #e0e0e0;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="35" r="20" fill="%23999"/><path d="M20 80 Q20 60 50 60 Q80 60 80 80 Z" fill="%23999"/></svg>');
+    background-size: cover;
+    background-position: center;
+    object-fit: cover;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.profile-image:hover {
+    opacity: 0.8;
+    transform: scale(1.05);
+}
+
+#imageUpload {
+    display: none;
+}
+
+.edit-btn {
+    background-color: #007AFF;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    padding: 8px 24px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    margin-top: 15px;
+    display: inline-block;
+    transition: all 0.3s ease;
+}
+
+.edit-btn:hover {
+    background-color: #0056b3;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,122,255,0.3);
+}
+
+.edit-btn:active {
+    transform: translateY(0);
+}
+
+/* プロフィール詳細 */
+.profile-details {
+    padding: 0 20px;
+    margin-top: 20px;
+}
+
+.detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.detail-row:last-child {
+    border-bottom: none;
+}
+
+.detail-label {
+    color: #666;
+    font-size: 16px;
+}
+
+.detail-value {
+    flex: 1;
+    text-align: right;
+    margin-left: 20px;
+}
+
+.detail-value input {
+    border: none;
+    background: none;
+    font-size: 16px;
+    font-weight: 500;
+    color: #000;
+    text-align: right;
+    width: 100%;
+    max-width: 200px;
+    cursor: pointer;
+    padding: 8px 12px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.detail-value input:focus {
+    outline: none;
+    border: 2px solid #007AFF;
+    background: #f8f9ff;
+    cursor: text;
+}
+
+.detail-value input:hover {
+    background: #f8f9ff;
+}
+
+.detail-value input[readonly] {
+    cursor: pointer;
+    background: none;
+}
+
+.detail-value input[readonly]:hover {
+    background: #f0f0f0;
+}
+
+/* 保存ボタンセクション */
+.save-section {
+    padding: 20px;
+    text-align: center;
+}
+
+.save-btn {
+    background-color: #34c759;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 40px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.save-btn:hover {
+    background-color: #2db84d;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(52,199,89,0.4);
+}
+
+.save-btn:active {
+    transform: translateY(0);
+}
+
+/* ===== ボトムナビ ===== */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: #fff;
+    border-top: 1px solid #ddd;
+    display: flex;
+    justify-content: space-around;
+    padding: 5px 0;
+}
+.nav-item {
+    text-align: center;
+    text-decoration: none;
+    color: #666;
+    font-size: 0.8rem;
+}
+.nav-item.active {
+    color: #007bff;
+}
+.nav-icon {
+    width: 24px;
+    height: 24px;
+    margin: 0 auto 3px;
+    background-size: contain;
+    background-repeat: no-repeat;
+}
+.nav-icon.person { background-image: url('icons/person.svg'); }
+.nav-icon.message { background-image: url('icons/message.svg'); }
+.nav-icon.settings { background-image: url('icons/settings.svg'); }
+
+/* レスポンシブ対応 */
+@media (max-width: 414px) {
+    .calendar-management {
+        margin: 16px 12px;
+        padding: 16px;
+    }
+    
+    .logo-section {
+        margin: 16px 12px;
+        padding: 16px;
+    }
+    
+    .profile-details {
+        padding: 0 12px;
+    }
+    
+    .calendar-link {
+        padding: 10px 20px;
+        font-size: 13px;
+    }
+}

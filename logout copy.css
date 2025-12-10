@@ -1,0 +1,34 @@
+        body {
+            font-family: sans-serif;
+            text-align: center;
+            padding-top: 100px;
+            background-color: #f8f8f8;
+        }
+        p {
+            font-size: 20px;
+            margin-bottom: 40px;
+        }
+        .btn {
+            font-size: 16px;
+            padding: 10px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 10px;
+            transition: 0.2s;
+        }
+        .yes {
+            background-color: #ff6b6b;
+            color: white;
+        }
+        .yes:hover {
+            background-color: #e63946;
+        }
+        .no {
+            background-color: #888;
+            color: white;
+        }
+        .no:hover {
+            background-color: #666;
+        }
+    
